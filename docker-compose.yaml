@@ -5,15 +5,17 @@ services:
         ports:
             - "8080:3000"
         environment:
-            - DB_HOST=mysql
-            - DB_USER=user
-            - DB_PASSWORD=password
-            - DB_NAME=owasp
-            - DB_PORT=3306
+            - MYSQL_HOST=mysql
+            - MYSQL_USER=user
+            - MYSQL_PASSWORD=password
+            - MYSQL_NAME=owasp
+            - MYSQL_PORT=3306
         volumes:
             - ./owasp:/usr/src/owasp
         networks:
             - mynetwork
+        depends_on:
+            - mysql
     mysql:
         image: mysql:latest
         environment:
