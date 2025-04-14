@@ -60,7 +60,7 @@ def forward_transfer_to_vault_server(from_account, to_account, amount):
     else:
         return None
 
-def move_amount_to_vault(account_number, amount):
+def add_amount_to_vault(account_number, amount):
     # This function should forward the request to move amount to the vault server
 
     url = f"{config.VAULT_SERVER_URL}/add_amount"
@@ -75,7 +75,7 @@ def move_amount_to_vault(account_number, amount):
         return response.json()
     else:
         return None
-def move_amount_from_vault(account_number, amount):
+def remove_amount_from_vault(account_number, amount):
     # This function should forward the request to move amount from the vault server
 
     url = f"{config.VAULT_SERVER_URL}/del_amount"
@@ -101,12 +101,28 @@ def transfer_funds(from_account, to_account, amount):
         return forward_transfer_to_vault_server(from_account, to_account, amount)
     if from_account_data['in_vault']:
         # Move amount from vault to local account
-        move_amount_from_vault(from_account, amount)
+        remove_amount_from_vault(from_account, amount)
         # Then transfer from local account to the destination account
+        query = "UPDATE accounts SET balance = balance - %s WHERE account_number = %s"
+        cusor.execute(query, (amount, from_account))
+        # Check if the transfer was successful
+    if to_account_data['in_vault']:
+        # Move amount from local account to vault
+        add_amount_to_vault(to_account, amount)
+        # Then transfer from vault to the destination account
+        query = "UPDATE accounts SET balance = balance + %s WHERE account_number = %s"
+        cusor.execute(query, (amount, to_account))
         
-
-
-        return transfer_funds(from_account, to_account, amount)
-
-
     return True
+
+def add_amount(account_number, amount):
+    # Check if the account is in vault
+    account_data = get_account(account_number)
+    if account_data['in_vault']:
+        # Forward the request to the vault server
+        return add_amount_to_vault(account_number, amount)
+    else:
+        # Update the local account balance
+        query = "UPDATE accounts SET balance = balance + %s WHERE account_number = %s"
+        cusor.execute(query, (amount, account_number))
+        return True

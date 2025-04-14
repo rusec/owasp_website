@@ -5,10 +5,6 @@ app = Flask(__name__, static_folder='../../static', static_url_path='/')
 
 
 
-# @app.route('/')
-# def index():
-#     return app.send_static_file('../../index.html')
-
 app.register_blueprint(employee_routes.employee_bp)
 app.register_blueprint(user_routes.users_bp)
 

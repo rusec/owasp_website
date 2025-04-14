@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 import jwt_utils
 import server.database.employee as employee_db
+import server.database.login as login_db
 import config
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/api/employee')
@@ -14,11 +15,18 @@ def login():
     if not username or not password and type(username) != str and type(password) != str:
         return jsonify({'message': 'Username and password are required!'}), 400
 
-    if employee_db.login_employee(username, password) == False:
+    if login_db.login_employee(username, password) == False:
         return jsonify({'message': 'Invalid credentials!'}), 401
     
+    employee = employee_db.get_employee(username)
+
     # Generate JWT token
-    token = jwt_utils.encode({'username': username, 'role': 'employee'})
+    token = jwt_utils.encode({
+        'username': username, 
+        'privilege': employee['privilege'] ,
+        'employee_id': employee['id'],
+        'role': 'employee',
+    })
 
     request.headers['Authorization'] = f'Bearer {token}'
     request.cookies['Authorization'] = f'Bearer {token}'
@@ -45,12 +53,12 @@ def check_employee_login():
         return jsonify({'message': 'Invalid token!'}), 401
     
 @employee_bp.route('/', methods=['GET'])
-@employee_bp.route('/<str:username>', methods=['GET'])
+@employee_bp.route('/<int:employee_id>', methods=['GET'])
 def get_employee():
     payload = check_employee_login()
     if type(payload) != dict:
         return payload
-    username = payload['username']
+    username = payload['employee_id']
     username_args = request.view_args.get('username')
     if username_args and username_args != username:
         return jsonify({'message': 'Unauthorized!'}), 401

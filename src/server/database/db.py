@@ -22,7 +22,6 @@ sql_db = mysql.connector.connect(
 cusor = sql_db.cursor()
 
 
-
 cusor.execute("""
         CREATE TABLE IF NOT EXISTS accounts (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,7 +56,7 @@ cusor.execute("""
         country VARCHAR(255),
         status ENUM('active', 'inactive') DEFAULT 'active',
         account_number INT,
-        FOREIGN KEY (account_number) REFERENCES accounts(id),
+        FOREIGN KEY (account_number) REFERENCES accounts(account_number),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
@@ -74,9 +73,34 @@ cusor.execute("""
         last_name VARCHAR(255) NOT NULL,
         status ENUM('active', 'inactive') DEFAULT 'active',
         privilege ENUM('admin', 'user', 'trader') DEFAULT 'user',
+        avatar_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
 """)
 # Employees will be able to manage the accounts and users. They will be able to create, update, delete and view accounts and users. They will also be able to manage the vault server. The employees will be created with a default status of active.
 
+cusor.execute("""
+        INSERT IGNORE INTO Employees (username, password, email, first_name, last_name, status, privilege)
+        VALUES (%s, %s, developer@admin.com, admin, admin, 'active', 'admin')
+""", (config.ADMIN_USERNAME, config.ADMIN_PASSWORD))
+
+# Insert the admin user into the Employees table if it doesn't exist
+cusor.execute("SELECT * FROM Employees WHERE username = %s", (config.ADMIN_USERNAME,))
+admin_user = cusor.fetchone()
+if not admin_user:
+    print("ERROR: Unable to create admin user")
+
+
+# add fake employee data to the Employees table
+# cusor.execute("""
+#         INSERT IGNORE INTO Employees (username, password, email, first_name, last_name, status, privilege)
+#         VALUES (%s, %s, %s, %s, %s, 'active', 'user', %s)
+# """, (
+#     "emma",
+#     "emmapassword",
+#     "emma@marvelrivals.com",
+#     "Emma",
+#     "Frost"
+#     ""
+# ))

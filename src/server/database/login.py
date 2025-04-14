@@ -1,5 +1,5 @@
 from db import cusor
-def login(username, password):
+def login_user(username, password):
     # Check if the user exists in the database
 
     # passwords are stored as plain text, given A07:2021 – Identification and Authentication Failures
