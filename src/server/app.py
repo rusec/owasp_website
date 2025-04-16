@@ -1,13 +1,19 @@
 from flask import Flask
-
+import routes.employee as employee_routes
+import routes.users as user_routes
 app = Flask(__name__, static_folder='../../static', static_url_path='/')
 
-# @app.route('/')
-# def index():
-#     return app.send_static_file('../../index.html')
 
+
+app.register_blueprint(employee_routes.employee_bp)
+app.register_blueprint(user_routes.users_bp)
 
 
 @app.route('/api/hello')
 def hello():
     return {'message': 'Hello, World!'}
+
+
+if __name__ == '__main__':
+    # Run the app on port 5000
+    app.run("0.0.0.0", port=5000, debug=True)
