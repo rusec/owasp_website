@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -10,25 +10,21 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // checks if emails and password is filled out
     if (!email || !password) {
       setError("Both fields are required");
       return;
     }
 
     try {
-      // Mock API call for login
       const response = await fetch("/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
-        // Redirect or handle successful login here
         console.log("Login successful");
+        // Redirect or handle success
       } else {
         setError("Invalid email or password");
       }
@@ -38,53 +34,54 @@ export default function Login() {
   };
 
   return (
-    
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <h1 className="text-3xl font-semibold">Login</h1>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full sm:w-[400px]">
-          <div className="flex flex-col">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
+    <div className="min-h-screen flex items-center justify-center bg-base-100">
+      <div className="card w-full max-w-sm shadow-xl bg-base-200 p-6">
+        <div className="flex flex-col items-center mb-6">
+          <h1 className="text-3xl font-bold mt-4">Login</h1>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="form-control">
+            <label htmlFor="email" className="label">
+              <span className="label-text">Email</span>
+            </label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border p-2 rounded-md focus:outline-none"
+              className="input input-bordered"
               placeholder="Enter your email"
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="password" className="text-sm font-medium">Password</label>
+
+          <div className="form-control">
+            <label htmlFor="password" className="label">
+              <span className="label-text">Password</span>
+            </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border p-2 rounded-md focus:outline-none"
+              className="input input-bordered"
               placeholder="Enter your password"
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" className="bg-blue-500 text-white rounded-full h-12 mt-4">Login</button>
+
+          {error && <p className="text-error text-sm">{error}</p>}
+
+          <button type="submit" className="btn btn-primary w-full">
+            Login
+          </button>
         </form>
-        <div className="flex gap-4 items-center flex-col sm:flex-row mt-6">
-          <a
-            className="text-sm text-blue-500 hover:underline"
-            href=" "
-          >
-            Don't have an account? Sign up here.
+
+        <div className="text-center mt-4">
+          <a className="link link-primary text-sm" href="#">
+            Don’t have an account? Sign up here.
           </a>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
