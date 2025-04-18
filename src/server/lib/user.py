@@ -26,7 +26,7 @@ class User:
         if not lastrowid:
             return None
         return User(username, password,lastrowid)
-    
+
     @staticmethod
     def login(username: str, password: str):
         cursor, _ = get_cursor()
@@ -46,27 +46,28 @@ class User:
         user_data = cursor.fetchone()
         cursor.close()
 
-        if user_data:
-            return{
-                'id': user_data['id'],
-                'username': user_data['username'],
-                # 'password': password,
-                'email': user_data['email'],
-                'first_name': user_data['first_name'],
-                'last_name': user_data['last_name'],
-                'phone': user_data['phone'],
-                'address': user_data['address'],
-                'city': user_data['city'],
-                'state': user_data['state'],
-                'zip': user_data['zip'],
-                'country': user_data['country'],
-                'status': user_data['status'],
-                'account_number': user_data['account_number'],
-                'created_at': str(user_data['created_at']),
-                'updated_at': str(user_data['updated_at'])
-            }
-        return None
-   
+        if not user_data:
+            return None
+
+        return{
+            'id': user_data['id'],
+            'username': user_data['username'],
+            # 'password': password,
+            'email': user_data['email'],
+            'first_name': user_data['first_name'],
+            'last_name': user_data['last_name'],
+            'phone': user_data['phone'],
+            'address': user_data['address'],
+            'city': user_data['city'],
+            'state': user_data['state'],
+            'zip': user_data['zip'],
+            'country': user_data['country'],
+            'status': user_data['status'],
+            'account_number': user_data['account_number'],
+            'created_at': str(user_data['created_at']),
+            'updated_at': str(user_data['updated_at'])
+        }
+
 
 def get_user_by_id(user_id: int):
     cursor, _ = get_cursor()

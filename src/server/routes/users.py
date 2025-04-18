@@ -1,9 +1,7 @@
 from flask import Blueprint, jsonify, request
 import jwt_utils
-import server.database.users as user_db
-import server.database.login as login_db
 import random_address
-from server.lib.user import User, get_user_by_id 
+from server.lib.user import User, get_user_by_id
 users_bp = Blueprint('users', __name__, url_prefix='/api/user')
 
 
@@ -66,7 +64,7 @@ def register():
 
     if not username or not password or not email or not phone_number or not first_name or not last_name:
         return jsonify({'message': 'All fields are required!'}), 400
-    
+
     # Generate random address, because we just want to test the register function
     address = random_address.real_random_address_by_city('New Brunswick')
     address_1 = address['address1']
@@ -74,7 +72,7 @@ def register():
     state = address['state']
     zip_code = address['zip']
     country = address['country']
-    
+
     user = User.register(
         username,
         password,
@@ -107,7 +105,7 @@ def get_user():
     user = get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found!'}), 404
-    
+
     if user:
         return jsonify(user.to_json()), 200
     else:

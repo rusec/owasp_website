@@ -2,8 +2,7 @@ from flask import Blueprint, jsonify, request
 from users import check_login
 import server.database.accounts as account_db
 import server.database.users as user_db
-from server.lib.account import Account
-from server.lib.user import User, get_user_by_id
+from server.lib.user import get_user_by_id
 account_bp = Blueprint('account', __name__, url_prefix='/api/account')
 
 
@@ -43,7 +42,7 @@ def transfer():
     if account.account_number == account_to:
         return jsonify({'message': 'Account from and account to must be different!'}), 400
 
-    result = account.transfer_funds(account_to['account_number'], amount)
+    result = account.transfer_funds(account_to, amount)
     if not result:
         return jsonify({'message': 'Transfer failed!'}), 500
 

@@ -36,6 +36,16 @@ cusor.execute("""
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
 """)
+
+cusor.execute("""
+        CREATE TABLE IF NOT EXISTS chat (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        sender_id INT NOT NULL,
+        message TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sender_id) REFERENCES employees(id),
+    )
+""")
 # if an account is created, it will be created with a default balance of 0.00 and a status of active. But it users can also have the ability to put there account in the vault server. This will foward any request queries to the vault server.
 # The vault server will be responsible for managing the account and its balance. The account will be created with a default balance of 0.00 and a status of active.
 
@@ -64,7 +74,7 @@ cusor.execute("""
 # When a new user is created it will be created with a default account type of user and a status of active. The user will also have the ability to create an account. The account will be created with a default balance of 0.00 and a status of active.
 
 cusor.execute("""
-        CREATE TABLE IF NOT EXISTS Employees (
+        CREATE TABLE IF NOT EXISTS employees (
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
@@ -81,7 +91,7 @@ cusor.execute("""
 # Employees will be able to manage the accounts and users. They will be able to create, update, delete and view accounts and users. They will also be able to manage the vault server. The employees will be created with a default status of active.
 
 cusor.execute("""
-        INSERT IGNORE INTO Employees (username, password, email, first_name, last_name, status, privilege)
+        INSERT IGNORE INTO employees (username, password, email, first_name, last_name, status, privilege)
         VALUES (%s, %s, developer@admin.com, admin, admin, 'active', 'admin')
 """, (config.ADMIN_USERNAME, config.ADMIN_PASSWORD))
 

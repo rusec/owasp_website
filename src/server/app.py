@@ -8,8 +8,6 @@ app = Flask(__name__, static_folder='../../static', static_url_path='/')
 app.register_blueprint(employee_routes.employee_bp)
 app.register_blueprint(user_routes.users_bp)
 
-
-
 @app.route('/api/health')
 def health():
     return {"message": "healthy"}
