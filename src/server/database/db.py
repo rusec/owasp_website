@@ -12,7 +12,7 @@ cusor = db.cursor()
 cusor.execute("CREATE DATABASE IF NOT EXISTS %s",(config.MYSQL_DATABASE, ))
 cusor.close()
 
-# Connect to the database 
+# Connect to the database
 sql_db = mysql.connector.connect(
     host=config.MYSQL_HOST,
     user=config.MYSQL_USER,
@@ -37,7 +37,7 @@ cusor.execute("""
     )
 """)
 # if an account is created, it will be created with a default balance of 0.00 and a status of active. But it users can also have the ability to put there account in the vault server. This will foward any request queries to the vault server.
-# The vault server will be responsible for managing the account and its balance. The account will be created with a default balance of 0.00 and a status of active. 
+# The vault server will be responsible for managing the account and its balance. The account will be created with a default balance of 0.00 and a status of active.
 
 
 cusor.execute("""
@@ -61,7 +61,7 @@ cusor.execute("""
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
 """)
-# When a new user is created it will be created with a default account type of user and a status of active. The user will also have the ability to create an account. The account will be created with a default balance of 0.00 and a status of active. 
+# When a new user is created it will be created with a default account type of user and a status of active. The user will also have the ability to create an account. The account will be created with a default balance of 0.00 and a status of active.
 
 cusor.execute("""
         CREATE TABLE IF NOT EXISTS Employees (
@@ -92,15 +92,35 @@ if not admin_user:
     print("ERROR: Unable to create admin user")
 
 
-# add fake employee data to the Employees table
-# cusor.execute("""
-#         INSERT IGNORE INTO Employees (username, password, email, first_name, last_name, status, privilege)
-#         VALUES (%s, %s, %s, %s, %s, 'active', 'user', %s)
-# """, (
-#     "emma",
-#     "emmapassword",
-#     "emma@marvelrivals.com",
-#     "Emma",
-#     "Frost"
-#     ""
-# ))
+
+sql_db.commit()
+cusor.close()
+
+def get_db():
+    return sql_db
+
+def get_cursor(dictionary=True):
+    sql_db = get_db()
+    cursor = sql_db.cursor(dictionary=dictionary)
+    return cursor, sql_db
+
+
+
+def init_db():
+    cursor, sql_db = get_cursor(dictionary=True)
+
+    employees = [
+        {
+            "username": "",
+            "password": "",
+            "email": "",
+            "first_name": "",
+            "last_name": "",
+            "status": "active",
+            "privilege": ""
+        }
+    ]
+
+    query = """
+    INSERT IGNORE INTO
+    """

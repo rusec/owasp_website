@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request
 import jwt_utils
 import server.database.employee as employee_db
 import server.database.login as login_db
-import config
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/api/employee')
 
@@ -17,12 +16,14 @@ def login():
 
     if login_db.login_employee(username, password) == False:
         return jsonify({'message': 'Invalid credentials!'}), 401
-    
+
     employee = employee_db.get_employee(username)
+    if not employee:
+        return jsonify({'message': 'Employee not found!'}), 404
 
     # Generate JWT token
     token = jwt_utils.encode({
-        'username': username, 
+        'username': username,
         'privilege': employee['privilege'] ,
         'employee_id': employee['id'],
         'role': 'employee',
@@ -47,11 +48,11 @@ def check_employee_login():
             return jsonify({'message': 'Unauthorized!'}), 401
 
         return payload
-    except jwt_utils.ExpiredSignatureError:
+    except jwt_utils.jwt.ExpiredSignatureError:
         return jsonify({'message': 'Token expired!'}), 401
-    except jwt_utils.InvalidTokenError:
+    except jwt_utils.jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token!'}), 401
-    
+
 @employee_bp.route('/', methods=['GET'])
 @employee_bp.route('/<int:employee_id>', methods=['GET'])
 def get_employee():
@@ -59,7 +60,7 @@ def get_employee():
     if type(payload) != dict:
         return payload
     username = payload['employee_id']
-    username_args = request.view_args.get('username')
+    username_args = request.args.get('username')
     if username_args and username_args != username:
         return jsonify({'message': 'Unauthorized!'}), 401
 
