@@ -5,48 +5,58 @@ def get_employee(username):
     query = "SELECT * FROM Employees WHERE username = %s"
     cusor.execute(query, (username,))
     employee = cusor.fetchone()
-    if employee:
-        return {
-            'id': employee[0],
-            'username': employee[1],
-            # 'password': employee[2],
-            'email': employee[3],
-            'first_name': employee[4],
-            'last_name': employee[5],
-            'status': employee[6],
-            'privilege': employee[7],
-            'created_at': str(employee[8]),
-            'updated_at': str(employee[9])
-        }
-    else:
+
+    if not employee:
         return None
+
+    (id, username, password, email, first_name, last_name, status, privilege, avatar_url, created_at, updated_at) = employee
+
+    return {
+        'id': id,
+        'username': username,
+        # 'password': password,
+        'email': email,
+        'first_name': first_name,
+        'last_name': last_name,
+        'status': status,
+        'privilege': privilege,
+        'avatar_url': avatar_url,
+        'created_at': str(created_at),
+        'updated_at': str(updated_at)
+    }
+
 
 def get_employee_by_id(employee_id):
     query = "SELECT * FROM Employees WHERE id = %s"
     cusor.execute(query, (employee_id,))
     employee = cusor.fetchone()
-    if employee:
-        return {
-            'id': employee[0],
-            'username': employee[1],
-            # 'password': employee[2],
-            'email': employee[3],
-            'first_name': employee[4],
-            'last_name': employee[5],
-            'status': employee[6],
-            'privilege': employee[7],
-            'created_at': str(employee[8]),
-            'updated_at': str(employee[9])
-        }
-    else:
+
+    if not employee:
         return None
 
-def create_employee(username, password, email, first_name, last_name):
+    (id, username, password, email, first_name, last_name, status, privilege, avatar_url, created_at, updated_at) = employee
+
+    return {
+        'id': id,
+        'username': username,
+        # 'password': password,
+        'email': email,
+        'first_name': first_name,
+        'last_name': last_name,
+        'status': status,
+        'privilege': privilege,
+        'avatar_url': avatar_url,
+        'created_at': str(created_at),
+        'updated_at': str(updated_at)
+    }
+
+
+def create_employee(username, password, email, first_name, last_name, avatar_url="/static/images/default_avatar.png"):
     query = """
-        INSERT INTO Employees (username, password, email, first_name, last_name)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO Employees (username, password, email, first_name, last_name, avatar_url)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """
-    cusor.execute(query, (username, password, email, first_name, last_name))
+    cusor.execute(query, (username, password, email, first_name, last_name, avatar_url))
     return cusor.lastrowid
 
 def update_privilege(user_id: int, privilege: str):
@@ -68,4 +78,3 @@ def update_password(user_id: int, new_password: str):
         return True
     else:
         return False
-

@@ -8,10 +8,9 @@ app = Flask(__name__, static_folder='../../static', static_url_path='/')
 app.register_blueprint(employee_routes.employee_bp)
 app.register_blueprint(user_routes.users_bp)
 
-
-@app.route('/api/hello')
-def hello():
-    return {'message': 'Hello, World!'}
+@app.route('/api/health')
+def health():
+    return {"message": "healthy"}
 
 
 if __name__ == '__main__':

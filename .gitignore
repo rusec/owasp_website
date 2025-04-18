@@ -43,3 +43,14 @@ next-env.d.ts
 .venv
 _pytest
 __pycache__
+
+# ignore nextjs build artifacts
+.next
+static/*.js
+*.js.map
+*.js
+/src/server/static/*.json
+trace
+/src/server/static/*
+!**/src/server/static/img
+!/src/server/static/favicon.ico

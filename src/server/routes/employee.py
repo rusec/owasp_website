@@ -2,8 +2,7 @@ from flask import Blueprint, jsonify, request
 import jwt_utils
 import server.database.employee as employee_db
 import server.database.login as login_db
-import config
-
+from server.lib.employee import Employee, get_employee_by_id
 employee_bp = Blueprint('employee', __name__, url_prefix='/api/employee')
 
 @employee_bp.route('/login', methods=['POST'])
@@ -15,16 +14,16 @@ def login():
     if not username or not password and type(username) != str and type(password) != str:
         return jsonify({'message': 'Username and password are required!'}), 400
 
-    if login_db.login_employee(username, password) == False:
+    employee = Employee.login(username, password)
+    if not employee:
         return jsonify({'message': 'Invalid credentials!'}), 401
-    
-    employee = employee_db.get_employee(username)
+
 
     # Generate JWT token
     token = jwt_utils.encode({
-        'username': username, 
-        'privilege': employee['privilege'] ,
-        'employee_id': employee['id'],
+        'username': employee.username,
+        'privilege': employee.privilege ,
+        'employee_id': employee.employee_id,
         'role': 'employee',
     })
 
@@ -47,24 +46,26 @@ def check_employee_login():
             return jsonify({'message': 'Unauthorized!'}), 401
 
         return payload
-    except jwt_utils.ExpiredSignatureError:
+    except jwt_utils.jwt.ExpiredSignatureError:
         return jsonify({'message': 'Token expired!'}), 401
-    except jwt_utils.InvalidTokenError:
+    except jwt_utils.jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token!'}), 401
-    
+
 @employee_bp.route('/', methods=['GET'])
 @employee_bp.route('/<int:employee_id>', methods=['GET'])
 def get_employee():
     payload = check_employee_login()
     if type(payload) != dict:
         return payload
-    username = payload['employee_id']
-    username_args = request.view_args.get('username')
-    if username_args and username_args != username:
+    employee_id = payload['employee_id']
+
+    employee_id_args = request.args.get('employee_id')
+
+    if employee_id_args and (employee_id_args != employee_id):
         return jsonify({'message': 'Unauthorized!'}), 401
 
-    employee = employee_db.get_employee(username_args or username)
+    employee = get_employee_by_id(employee_id_args) 
     if employee:
-        return jsonify(employee), 200
+        return jsonify(employee.to_json()), 200
     else:
         return jsonify({'message': 'Employee not found!'}), 404

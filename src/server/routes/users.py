@@ -1,9 +1,7 @@
 from flask import Blueprint, jsonify, request
 import jwt_utils
-import server.database.users as user_db 
-import server.database.login as login_db
 import random_address
-
+from server.lib.user import User, get_user_by_id
 users_bp = Blueprint('users', __name__, url_prefix='/api/user')
 
 
@@ -16,20 +14,15 @@ def login():
 
     if not username or not password and type(username) != str and type(password) != str:
         return jsonify({'message': 'Username and password are required!'}), 400
-    
-    
-    if login_db.login_user(username, password) == False:
-        return jsonify({'message': 'Invalid credentials!'}), 401
-    
-    user = user_db.get_user(username)
+
+    user = User.login(username, password)
     if not user:
-        return jsonify({'message': 'User not found!'}), 404
-    
+        return jsonify({'message': 'Invalid credentials!'}), 401
 
     # Generate JWT token
     token = jwt_utils.encode({
-        'username': username ,
-        "user_id": user['id'],
+        'username': user.username ,
+        "user_id": user.id,
         'role': 'user',
     })
 
@@ -43,7 +36,7 @@ def login():
 def check_login():
     # Check if the user is logged in
     token = request.headers.get('Authorization')
-    
+
     if not token:
         return jsonify({'message': 'Unauthorized!'}), 401
     try:
@@ -53,11 +46,11 @@ def check_login():
             return jsonify({'message': 'Unauthorized!'}), 401
 
         return payload
-    except jwt_utils.ExpiredSignatureError:
+    except jwt_utils.jwt.ExpiredSignatureError:
         return jsonify({'message': 'Token expired!'}), 401
-    except jwt_utils.InvalidTokenError:
+    except jwt_utils.jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token!'}), 401
-    
+
 
 @users_bp.route('/register', methods=['POST'])
 def register():
@@ -69,6 +62,8 @@ def register():
     email = data.get('email')
     phone_number = data.get('phone_number')
 
+    if not username or not password or not email or not phone_number or not first_name or not last_name:
+        return jsonify({'message': 'All fields are required!'}), 400
 
     # Generate random address, because we just want to test the register function
     address = random_address.real_random_address_by_city('New Brunswick')
@@ -78,25 +73,21 @@ def register():
     zip_code = address['zip']
     country = address['country']
 
-
-    if not username or not password or not email or not phone_number or not first_name or not last_name:
-        return jsonify({'message': 'All fields are required!'}), 400
-
-    if user_db.register_user(
-        username, 
-        password, 
-        email, 
-        first_name, 
-        last_name, 
-        phone_number, 
-        address_1, 
-        city, 
-        state, 
-        zip_code, 
-        country
-        ) == False:
+    user = User.register(
+        username,
+        password,
+        email,
+        first_name,
+        last_name,
+        phone_number,
+        address_1,
+        city,
+        state,
+        zip_code,
+        country)
+    if not user:
         return jsonify({'message': 'Username already exists!'}), 409
-    
+
     return jsonify({'message': 'User registered successfully!'}), 201
 
 @users_bp.route('/', methods=['GET'])
@@ -105,15 +96,17 @@ def get_user():
     payload = check_login()
     if type(payload) != dict:
         return payload
-    
+
     user_id = payload['user_id']
-    username_args = request.view_args.get('user_id')
-    if username_args and username_args != user_id:
+    username_args = request.args.get('user_id')
+    if username_args and (username_args != user_id):
             return jsonify({'message': 'Unauthorized!'}), 401
-    
-    user = user_db.get_user_by_id(username_args or user_id)
+
+    user = get_user_by_id(user_id)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
     if user:
-        return jsonify(user), 200
+        return jsonify(user.to_json()), 200
     else:
         return jsonify({'message': 'User not found!'}), 404
-    
