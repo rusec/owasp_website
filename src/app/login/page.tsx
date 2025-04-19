@@ -24,7 +24,7 @@ export default function Login() {
 
       if (response.ok) {
         console.log("Login successful");
-        // Redirect or handle success
+        // add backend
       } else {
         setError("Invalid email or password");
       }
