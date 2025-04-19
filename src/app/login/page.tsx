@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useState } from "react";
 
 export default function Login() {
@@ -15,7 +14,6 @@ export default function Login() {
       return;
     }
 
-    try {
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,9 +26,6 @@ export default function Login() {
       } else {
         setError("Invalid email or password");
       }
-    } catch (err) {
-      setError("Something went wrong, please try again");
-    }
   };
 
   return (
