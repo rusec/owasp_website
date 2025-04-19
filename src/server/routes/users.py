@@ -10,19 +10,33 @@ def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    email = data.get('email')
 
 
-    if not username or not password and type(username) != str and type(password) != str:
-        return jsonify({'message': 'Username and password are required!'}), 400
+    if not password:
+        return jsonify({'message': 'password are required!'}), 400
+    if not username and not email:
+        return jsonify({'message': 'Username or Email and password are required!'}), 400
 
-    user = User.login(username, password)
+    user = User.login(username, password, email)
     if not user:
         return jsonify({'message': 'Invalid credentials!'}), 401
+
 
     # Generate JWT token
     token = jwt_utils.encode({
         'username': user.username ,
         "user_id": user.id,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'phone_number': user.phone,
+        'address': user.address,
+        'city': user.city,
+        'state': user.state,
+        'zip_code': user.zip_code,
+        'country': user.country,
+        'account_number': user.account_number,
         'role': 'user',
     })
 

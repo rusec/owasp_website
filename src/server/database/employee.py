@@ -1,10 +1,10 @@
-from db import cusor
+from db import cursor
 
 
 def get_employee(username):
     query = "SELECT * FROM Employees WHERE username = %s"
-    cusor.execute(query, (username,))
-    employee = cusor.fetchone()
+    cursor.execute(query, (username,))
+    employee = cursor.fetchone()
 
     if not employee:
         return None
@@ -28,8 +28,8 @@ def get_employee(username):
 
 def get_employee_by_id(employee_id):
     query = "SELECT * FROM Employees WHERE id = %s"
-    cusor.execute(query, (employee_id,))
-    employee = cusor.fetchone()
+    cursor.execute(query, (employee_id,))
+    employee = cursor.fetchone()
 
     if not employee:
         return None
@@ -56,8 +56,8 @@ def create_employee(username, password, email, first_name, last_name, avatar_url
         INSERT INTO Employees (username, password, email, first_name, last_name, avatar_url)
         VALUES (%s, %s, %s, %s, %s, %s)
     """
-    cusor.execute(query, (username, password, email, first_name, last_name, avatar_url))
-    return cusor.lastrowid
+    cursor.execute(query, (username, password, email, first_name, last_name, avatar_url))
+    return cursor.lastrowid
 
 def update_privilege(user_id: int, privilege: str):
     allows_privilege = ['admin', 'user', 'trader']
@@ -65,16 +65,16 @@ def update_privilege(user_id: int, privilege: str):
         return False
 
     query = "UPDATE Employees SET privilege = %s WHERE user_id = %s"
-    cusor.execute(query, (privilege, user_id))
-    if cusor.rowcount > 0:
+    cursor.execute(query, (privilege, user_id))
+    if cursor.rowcount > 0:
         return True
     else:
         return False
 
 def update_password(user_id: int, new_password: str):
     query = "UPDATE Employees SET password = %s WHERE user_id = %s"
-    cusor.execute(query, (new_password, user_id))
-    if cusor.rowcount > 0:
+    cursor.execute(query, (new_password, user_id))
+    if cursor.rowcount > 0:
         return True
     else:
         return False

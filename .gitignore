@@ -52,5 +52,8 @@ static/*.js
 /src/server/static/*.json
 trace
 /src/server/static/*
+/src/server/static/*.js
+/src/server/static/*.js.map
+/src/server/static/*.json
 !**/src/server/static/img
 !/src/server/static/favicon.ico

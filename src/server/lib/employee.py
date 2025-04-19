@@ -2,26 +2,43 @@ from src.server.database.db import do_query, fetch_row
 from src.server.lib.chat import chatroom
 
 class Employee :
-    def __init__(self, username, password, privilege, employee_id):
+    def __init__(self, username, password, privilege, employee_id, email=None, first_name=None, last_name=None, status=None, avatar_url=None):
         self.username = username
         self.password = password
         self.privilege = privilege
         self.employee_id = employee_id
         self.privileges = ['admin', 'user', 'trader']
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.status = status
+        self.avatar_url = avatar_url
 
     def __repr__(self):
         return f"Employee(username={self.username}, privilege={self.privilege}, employee_id={self.employee_id})"
 
     @staticmethod
-    def login(username, password):
-        employee_data = fetch_row("SELECT * FROM Employees WHERE username = %s AND password = %s", (username, password))
+    def login(username:str| None, password, email:str| None = None):
+        if not password:
+            return None
+        if not username and not email:
+            return None
+        if username:
+            employee_data = fetch_row("SELECT * FROM Employees WHERE username = %s AND password = %s", (username, password))
+        elif email:
+            employee_data = fetch_row("SELECT * FROM Employees WHERE email = %s AND password = %s", (email, password))
         if not employee_data:
             return None
         return Employee(
             username=employee_data['username'],
             password=employee_data['password'],
             privilege=employee_data['privilege'],
-            employee_id=employee_data['id']
+            employee_id=employee_data['id'],
+            email=employee_data['email'],
+            first_name=employee_data['first_name'],
+            last_name=employee_data['last_name'],
+            status=employee_data['status'],
+            avatar_url=employee_data['avatar_url']
         )
 
 

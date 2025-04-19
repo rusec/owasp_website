@@ -1,5 +1,7 @@
 from src.server.database.accounts import get_account_internal, create_account, transfer_funds,get_account
 from src.server.database.db import do_query, fetch_row, fetch_all
+from server.lib.vault import forward_account_to_vault_server
+
 class Account:
     def __init__(self, account_number, user_id, balance):
         self.account_number = account_number
@@ -14,6 +16,26 @@ class Account:
     def transfer_funds(self, to_account_number, amount):
         return transfer_funds(self.account_number, to_account_number, amount)
 
+    def transfer_account_to_vault(self, account_number):
+        """
+        Transfer the account to the vault server.
+        """
+        # Check if the account is already in the vault
+        account = get_account_internal(account_number)
+        if not account:
+            return None
+        if account['in_vault'] == 1:
+            return None
+
+        # Transfer the account to the vault server
+
+        result = forward_account_to_vault_server(account_number)
+        if not result:
+            return None
+
+        return do_query("UPDATE accounts SET in_vault = 1 WHERE account_number = %s", (account_number,))
+    
+
     @staticmethod
     def create_account(account_number,user_id, account_type, in_vault):
         """
@@ -27,6 +49,9 @@ class Account:
             return None
         return Account(account['account_number'], account['user_id'], account['balance'])
 
+    def get_transactions(self):
+        transactions = fetch_all("SELECT * FROM transactions WHERE account_number = %s", (self.account_number,))
+        return transactions if transactions else None
 
     def to_json(self):
         account = get_account_internal(self.account_number)

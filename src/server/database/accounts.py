@@ -2,7 +2,7 @@ from random_address.random_address import Dict
 import server.config as config
 import requests
 import db as db
-
+from server.lib.vault import forward_to_vault_server, forward_transfer_to_vault_server, add_amount_to_vault, remove_amount_from_vault
 def create_account(account_number, account_type, in_vault, user_id):
 
     account = db.insert_query("""
@@ -16,10 +16,7 @@ def create_account(account_number, account_type, in_vault, user_id):
 
 def get_account_internal(account_number:str):
 
-    cursor, _ = db.get_cursor(dictionary=True)
-    query = "SELECT * FROM accounts WHERE account_number = %s"
-    cursor.execute(query, (account_number,))
-    account = cursor.fetchone()
+    account = db.fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
 
     if not account :
         return None
@@ -27,7 +24,6 @@ def get_account_internal(account_number:str):
     if type(account) != Dict:
         return None
 
-    cursor.close()
 
     if account == 1:
         # If the account is in vault, forward the request to the vault server
@@ -47,11 +43,8 @@ def get_account(account_number:str, requested_user_id:str):
     """
     Fetch account information if user is authorized and account is not in vault.
     """
-    cursor, _ = db.get_cursor(dictionary=True)
+    account = db.fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
 
-    query = "SELECT * FROM accounts WHERE account_number = %s"
-    cursor.execute(query, (account_number,))
-    account = cursor.fetchone()
     if not account:
         return None
 
@@ -78,64 +71,8 @@ def get_account(account_number:str, requested_user_id:str):
         "updated_at": str(account["updated_at"])
     }
 
-def forward_to_vault_server(account_number):
-    # This function should forward the request to the vault server
 
-    url = f"{config.VAULT_SERVER_URL}/accounts/{account_number}"
 
-    response = requests.get(url, timeout=5)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
-
-def forward_transfer_to_vault_server(from_account, to_account, amount):
-    # This function should forward the transfer request to the vault server
-
-    url = f"{config.VAULT_SERVER_URL}/transfer"
-
-    data = {
-        'from_account': from_account,
-        'to_account': to_account,
-        'amount': amount
-    }
-
-    response = requests.post(url, json=data, timeout=5)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
-
-def add_amount_to_vault(account_number, amount):
-    # This function should forward the request to move amount to the vault server
-
-    url = f"{config.VAULT_SERVER_URL}/add_amount"
-
-    data = {
-        'account_number': account_number,
-        'amount': amount
-    }
-
-    response = requests.post(url, json=data, timeout=5)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
-def remove_amount_from_vault(account_number, amount):
-    # This function should forward the request to move amount from the vault server
-
-    url = f"{config.VAULT_SERVER_URL}/del_amount"
-
-    data = {
-        'account_number': account_number,
-        'amount': amount
-    }
-
-    response = requests.post(url, json=data, timeout=5)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
 
 def transfer_funds(from_account, to_account, amount):
     """
@@ -156,7 +93,13 @@ def transfer_funds(from_account, to_account, amount):
 
     if from_account_data['in_vault'] and to_account_data['in_vault']:
         # Forward the transfer request to the vault server
-        return forward_transfer_to_vault_server(from_account, to_account, amount)
+        result =  forward_transfer_to_vault_server(from_account, to_account, amount)
+        if not result:
+            return False
+        
+        log_transfer(from_account, to_account, amount)
+
+        return True
 
     cursor, sql_db = db.get_cursor()
 
@@ -191,8 +134,10 @@ def transfer_funds(from_account, to_account, amount):
 
     # log the transfer
 
-
-
+    result = log_transfer(from_account, to_account, amount)
+    if not result:
+        return False
+    
 
     return True
 
@@ -200,6 +145,16 @@ def log_transfer(from_account, to_account, amount):
 
     # add withdrawal to transaction log
 
+    query = """
+        INSERT INTO transactions (account_number, transaction_type, amount, timestamp)
+        VALUES (%s, %s, %s, NOW())
+    """
+
+    insert_query = db.insert_query(query, (from_account, 'withdrawal', amount))
+    insert_query = db.insert_query(query, (to_account, 'deposit', amount))
+    if not insert_query:
+        return False
+    return True
 
 
 

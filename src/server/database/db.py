@@ -1,6 +1,13 @@
 import mysql.connector
 import config
-
+import time
+from lib.vault import check_vault
+from lib.account import Account
+from lib.user import User
+from lib.employee import Employee
+import random_address
+from faker import Faker
+import random
 # Connect to MySQL server and create a database if it doesn't exist
 db = mysql.connector.connect(
     host=config.MYSQL_HOST,
@@ -9,9 +16,9 @@ db = mysql.connector.connect(
 )
 
 
-cusor = db.cursor()
-cusor.execute("CREATE DATABASE IF NOT EXISTS %s",(config.MYSQL_DATABASE, ))
-cusor.close()
+cursor = db.cursor()
+cursor.execute("CREATE DATABASE IF NOT EXISTS %s",(config.MYSQL_DATABASE, ))
+cursor.close()
 
 # Connect to the database
 sql_db = mysql.connector.connect(
@@ -20,10 +27,10 @@ sql_db = mysql.connector.connect(
     password=config.MYSQL_PASSWORD,
     database=config.MYSQL_DATABASE
 )
-cusor = sql_db.cursor()
+cursor = sql_db.cursor()
 
 
-cusor.execute("""
+cursor.execute("""
         CREATE TABLE IF NOT EXISTS accounts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         account_number INT NOT NULL UNIQUE,
@@ -37,7 +44,7 @@ cusor.execute("""
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
 """)
-cusor.execute("""
+cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         account_number INT NOT NULL,
@@ -47,7 +54,7 @@ cusor.execute("""
         FOREIGN KEY (account_number) REFERENCES accounts(account_number)
         """)
 
-cusor.execute("""
+cursor.execute("""
         CREATE TABLE IF NOT EXISTS chat (
         id INT AUTO_INCREMENT PRIMARY KEY,
         sender_id INT NOT NULL,
@@ -60,7 +67,7 @@ cusor.execute("""
 # The vault server will be responsible for managing the account and its balance. The account will be created with a default balance of 0.00 and a status of active.
 
 
-cusor.execute("""
+cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(255) NOT NULL UNIQUE,
@@ -83,7 +90,7 @@ cusor.execute("""
 """)
 # When a new user is created it will be created with a default account type of user and a status of active. The user will also have the ability to create an account. The account will be created with a default balance of 0.00 and a status of active.
 
-cusor.execute("""
+cursor.execute("""
         CREATE TABLE IF NOT EXISTS employees (
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(255) NOT NULL UNIQUE,
@@ -98,23 +105,33 @@ cusor.execute("""
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
 """)
+
+cursor.execute("""
+        CREATE TABLE IF NOT EXISTS init (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        flag BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+""")           
+
 # Employees will be able to manage the accounts and users. They will be able to create, update, delete and view accounts and users. They will also be able to manage the vault server. The employees will be created with a default status of active.
 
-cusor.execute("""
+cursor.execute("""
         INSERT IGNORE INTO employees (username, password, email, first_name, last_name, status, privilege)
         VALUES (%s, %s, developer@admin.com, admin, admin, 'active', 'admin')
 """, (config.ADMIN_USERNAME, config.ADMIN_PASSWORD))
 
 # Insert the admin user into the Employees table if it doesn't exist
-cusor.execute("SELECT * FROM Employees WHERE username = %s", (config.ADMIN_USERNAME,))
-admin_user = cusor.fetchone()
+cursor.execute("SELECT * FROM Employees WHERE username = %s", (config.ADMIN_USERNAME,))
+admin_user = cursor.fetchone()
 if not admin_user:
     print("ERROR: Unable to create admin user")
 
 
 
 sql_db.commit()
-cusor.close()
+cursor.close()
 
 def get_db():
     return sql_db
@@ -126,24 +143,97 @@ def get_cursor(dictionary=True):
 
 
 
-def init_db():
-    cursor, sql_db = get_cursor(dictionary=True)
-
-    employees = [
-        {
-            "username": "",
-            "password": "",
-            "email": "",
-            "first_name": "",
-            "last_name": "",
-            "status": "active",
-            "privilege": ""
-        }
-    ]
-
-    query = """
-    INSERT IGNORE INTO
+def init_db(force=False):
     """
+    Initialize the database with default values.
+    """
+    init_query = "SELECT * FROM init"
+    row = fetch_row(init_query)
+    if row and not force:
+        print("Database already initialized")
+        return False
+    
+    checks = 0
+    while True:
+        result = check_vault() 
+        if result:
+            break
+        checks += 1
+        if checks > 5:
+            print("ERROR: Unable to connect to vault server")
+            return False
+        print("ERROR: Unable to connect to vault server, retrying in 1 second")
+        time.sleep(1)
+
+    accounts:list[Account] = []
+    # make 20 users with random data
+    for i in range(20):
+        fake = Faker()
+        username = fake.user_name()
+        password = fake.password()
+        email = fake.email()
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        phone = fake.phone_number()
+        address = random_address.real_random_address_by_city('New Brunswick')
+        address_1 = address['address1']
+        city = address['city']
+        state = address['state']
+        zip_code = address['zip']
+        country = address['country']
+        user = User.register(
+            username,
+            password,
+            email,
+            first_name,
+            last_name,
+            phone,
+            address_1,
+            city,
+            state,
+            zip_code,
+            country)
+        if not user:
+            print("ERROR: Unable to create user")
+            continue
+        account = user.get_account()
+        if not account:
+            print("ERROR: Unable to create account")
+            continue
+        accounts.append(account)
+
+        result = random.randint(0, 1)
+        if result == 1:
+            result = account.transfer_account_to_vault()
+            if not result:
+                print("ERROR: Unable to transfer account to vault")
+                continue
+        print(f"Created user {username} with account number {account.account_number}")
+
+        # create a transaction for the user
+        for j in range(50):
+            account_from_index = random.randint(0, len(accounts) - 1)
+            account_to_index = random.randint(0, len(accounts) - 1)
+            amount = random.randint(1, 1000)
+            
+            account_from = accounts[account_from_index]
+            account_to = accounts[account_to_index]
+            if not account_from or not account_to:
+                print("ERROR: Unable to create transaction")
+                continue
+            if account_from.account_number == account_to.account_number:
+                continue
+
+            result = account_from.transfer_funds(account_to.account_number, amount)
+            print(f"Transferred {amount} from account {account_from.account_number} to account {account_to.account_number}")
+
+    init_query = "INSERT INTO init (flag) VALUES (%s)"
+    insert_query(init_query, (True,))
+    print("Database initialized")
+
+
+
+    
 def insert_query (query, data):
     cursor, sql_db = get_cursor()
     cursor.execute(query, data)

@@ -3,9 +3,9 @@ from users import check_login
 import server.database.accounts as account_db
 import server.database.users as user_db
 from server.lib.user import get_user_by_id
+
+
 account_bp = Blueprint('account', __name__, url_prefix='/api/account')
-
-
 
 @account_bp.route('/transfer', methods=['POST'])
 def transfer():
@@ -47,6 +47,29 @@ def transfer():
         return jsonify({'message': 'Transfer failed!'}), 500
 
     return jsonify({'message': 'Transfer successful!'}), 200
+
+
+@account_bp.route('/transactions', methods=['GET'])
+def get_transactions():
+    user_payload = check_login()
+    if type(user_payload) != dict:
+        return user_payload
+    user_id = user_payload['user_id']
+
+    user = get_user_by_id(user_id)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
+    account = user.get_account()
+    if not account:
+        return jsonify({'message': 'Account not found!'}), 404
+    
+    transactions = account.get_transactions()
+    if not transactions:
+        return jsonify({'message': 'No transactions found!'}), 404
+    
+    return jsonify(transactions), 200
+
 
 @account_bp.route('/', methods=['GET'])
 @account_bp.route('/<string:account_number>', methods=['GET'])

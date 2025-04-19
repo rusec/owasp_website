@@ -1,37 +1,7 @@
+import random
 from db import get_cursor
 import utils
 
-
-# def get_user(username):
-#     query = "SELECT * FROM users WHERE username = %s"
-#     cursor, _ = get_cursor(dictionary=True)
-#     cursor.execute(query, (username,))
-#     user = cursor.fetchone()
-
-#     if not user:
-#         return None
-
-#     (id, username, password, email, first_name, last_name, phone, address, city, state, zip, country, status, account_number, created_at, updated_at) = user
-
-#     cursor.close()
-#     return {
-#         'id': id,
-#         'username': username,
-#         # 'password': password,
-#         'email': email,
-#         'first_name': first_name,
-#         'last_name': last_name,
-#         'phone': phone,
-#         'address': address,
-#         'city': city,
-#         'state': state,
-#         'zip': zip,
-#         'country': country,
-#         'status': status,
-#         'account_number': account_number,
-#         'created_at': str(created_at),
-#         'updated_at': str(updated_at)
-#     }
 
 def get_user_by_id(user_id):
 
@@ -114,7 +84,7 @@ def create_user_account(user_id):
     account_type = 'savings'
     in_vault = False
     account_status = 'active'
-    balance = 0.00
+    balance = random.uniform(1000, 10000)
     cursor, _ = get_cursor(dictionary=True)
     query = """
         SELECT * FROM accounts WHERE account_number = %s
