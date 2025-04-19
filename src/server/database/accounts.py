@@ -1,28 +1,16 @@
 from random_address.random_address import Dict
 import server.config as config
 import requests
-import server.database.db as db
+import db as db
 
 def create_account(account_number, account_type, in_vault, user_id):
-    cursor, sql_db = db.get_cursor()
 
-    query = """
+    account = db.insert_query("""
         INSERT INTO accounts (account_number, account_type, in_vault, user_id)
         VALUES (%s, %s, %s, %s)
-    """
-    cursor.execute(query, (account_number, account_type, in_vault, user_id))
+    """, (account_number, account_type, in_vault, user_id))
 
-    lastrowid = cursor.lastrowid
-    if not lastrowid:
-        return None
-
-    sql_db.commit()
-    cursor.close()
-
-    # add to vault server
-
-
-    return cursor.lastrowid
+    return account
 
 
 
@@ -201,7 +189,19 @@ def transfer_funds(from_account, to_account, amount):
     sql_db.commit()
     cursor.close()
 
+    # log the transfer
+
+
+
+
     return True
+
+def log_transfer(from_account, to_account, amount):
+
+    # add withdrawal to transaction log
+
+
+
 
 def add_amount(account_number, amount):
     # Check if the account is in vault

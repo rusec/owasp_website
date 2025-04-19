@@ -1,5 +1,5 @@
 from src.server.database.accounts import get_account_internal, create_account, transfer_funds,get_account
-from src.server.database.db import get_cursor
+from src.server.database.db import do_query, fetch_row, fetch_all
 class Account:
     def __init__(self, account_number, user_id, balance):
         self.account_number = account_number
@@ -7,10 +7,8 @@ class Account:
         self.balance = balance
 
     def get_balance(self):
-        cursor, _ = get_cursor()
-        cursor.execute("SELECT balance FROM accounts WHERE account_number = %s", (self.account_number,))
-        balance = cursor.fetchone()
-        cursor.close()
+
+        balance = fetch_row("SELECT balance FROM accounts WHERE account_number = %s", (self.account_number,))
         return balance['balance'] if balance else None
 
     def transfer_funds(self, to_account_number, amount):

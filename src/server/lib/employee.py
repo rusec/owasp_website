@@ -1,4 +1,4 @@
-from src.server.database.db import get_cursor, get_db
+from src.server.database.db import do_query, fetch_row
 from src.server.lib.chat import chatroom
 
 class Employee :
@@ -14,37 +14,28 @@ class Employee :
 
     @staticmethod
     def login(username, password):
-        cursor, _ = get_cursor()
-        cursor.execute("SELECT * FROM Employees WHERE username = %s AND password = %s", (username, password))
-        employee_data = cursor.fetchone()
-        cursor.close()
+        employee_data = fetch_row("SELECT * FROM Employees WHERE username = %s AND password = %s", (username, password))
+        if not employee_data:
+            return None
+        return Employee(
+            username=employee_data['username'],
+            password=employee_data['password'],
+            privilege=employee_data['privilege'],
+            employee_id=employee_data['id']
+        )
 
-        if employee_data:
-            return Employee(
-                username=employee_data['username'],
-                password=employee_data['password'],
-                privilege=employee_data['privilege'],
-                employee_id=employee_data['id']
-            )
-        return None
 
     def update_password(self, new_password):
         if not new_password:
             raise ValueError("Password cannot be empty.")
         self.password = new_password
-        cursor, sql_db = get_cursor()
-        cursor.execute("UPDATE Employees SET password = %s WHERE employee_id = %s", (self.password, self.employee_id))
-        sql_db.commit()
-        cursor.close()
+        do_query("UPDATE Employees SET password = %s WHERE employee_id = %s", (self.password, self.employee_id))
 
     def update_privilege(self, new_privilege):
         if new_privilege not in self.privileges:
             raise ValueError(f"Invalid privilege: {new_privilege}. Must be one of {self.privileges}.")
         self.privilege = new_privilege
-        cursor, sql_db = get_cursor()
-        cursor.execute("UPDATE Employees SET privilege = %s WHERE employee_id = %s", (self.privilege, self.employee_id))
-        sql_db.commit()
-        cursor.close()
+        do_query("UPDATE Employees SET privilege = %s WHERE employee_id = %s", (self.privilege, self.employee_id))
 
     def chat(self, message):
         messsage_info = {
@@ -55,10 +46,10 @@ class Employee :
         chatroom.add_message(messsage_info)
 
     def to_json(self):
-        cursor, _ = get_cursor()
-        cursor.execute("SELECT * FROM Employees WHERE id = %s", (self.employee_id,))
-        employee_data = cursor.fetchone()
-        cursor.close()
+
+
+        employee_data = fetch_row("SELECT * FROM Employees WHERE id = %s", (self.employee_id,))
+
         if not employee_data:
             return None
 
@@ -76,10 +67,8 @@ class Employee :
         }
 
 def get_employee_by_id(employee_id):
-    cursor, _ = get_cursor()
-    cursor.execute("SELECT * FROM Employees WHERE id = %s", (employee_id,))
-    employee_data = cursor.fetchone()
-    cursor.close()
+
+    employee_data = fetch_row("SELECT * FROM Employees WHERE id = %s", (employee_id,))
 
     if employee_data:
         return Employee(

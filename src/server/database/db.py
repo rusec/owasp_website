@@ -1,5 +1,5 @@
-import config
 import mysql.connector
+import config
 
 # Connect to MySQL server and create a database if it doesn't exist
 db = mysql.connector.connect(
@@ -7,6 +7,7 @@ db = mysql.connector.connect(
     user=config.MYSQL_USER,
     password=config.MYSQL_PASSWORD,
 )
+
 
 cusor = db.cursor()
 cusor.execute("CREATE DATABASE IF NOT EXISTS %s",(config.MYSQL_DATABASE, ))
@@ -36,6 +37,15 @@ cusor.execute("""
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
 """)
+cusor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        account_number INT NOT NULL,
+        transaction_type ENUM('deposit', 'withdrawal') NOT NULL,
+        amount DECIMAL(10, 2) NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (account_number) REFERENCES accounts(account_number)
+        """)
 
 cusor.execute("""
         CREATE TABLE IF NOT EXISTS chat (
@@ -134,3 +144,39 @@ def init_db():
     query = """
     INSERT IGNORE INTO
     """
+def insert_query (query, data):
+    cursor, sql_db = get_cursor()
+    cursor.execute(query, data)
+    sql_db.commit()
+    cursor.close()
+    return cursor.lastrowid
+
+def do_query(query, data=None):
+    cursor, sql_db = get_cursor()
+    if data:
+        cursor.execute(query, data)
+    else:
+        cursor.execute(query)
+    sql_db.commit()
+    cursor.close()
+    return cursor.fetchall()
+
+def fetch_row(query, data=None)
+    cursor, sql_db = get_cursor()
+    if data:
+        cursor.execute(query, data)
+    else:
+        cursor.execute(query)
+    row = cursor.fetchone()
+    cursor.close()
+    return row
+
+def fetch_all(query, data=None):
+    cursor, sql_db = get_cursor()
+    if data:
+        cursor.execute(query, data)
+    else:
+        cursor.execute(query)
+    rows = cursor.fetchall()
+    cursor.close()
+    return rows

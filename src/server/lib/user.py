@@ -1,8 +1,8 @@
-from src.server.database.db import get_cursor, get_db
-from src.server.database.accounts import get_account_internal
+from src.server.database.db import fetch_row, get_cursor
+from src.server.database.users import register_user
 from account import Account
 class User:
-    def __init__(self, username: str, password: str, user_id: int = None):
+    def __init__(self, username: str, password: str, user_id: int | None = None):
         self.username = username
         self.password = password
         self.id = user_id
@@ -17,22 +17,20 @@ class User:
 
     @staticmethod
     def register(username: str, password: str, email: str, first_name: str, last_name: str, phone: str, address: str, city: str, state: str, zip_code: str, country: str):
-        cursor, sql_db = get_cursor()
-        cursor.execute("INSERT INTO Users (username, password, email, first_name, last_name, phone, address, city, state, zip, country) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                       (username, password, email, first_name, last_name, phone, address, city, state, zip_code, country))
-        sql_db.commit()
-        cursor.close()
-        lastrowid = cursor.lastrowid
-        if not lastrowid:
+        result = register_user(username, password, email, first_name, last_name, phone, address, city, state, zip_code, country)
+        if not result:
             return None
-        return User(username, password,lastrowid)
+
+        user_id, account_number = result
+        if not account_number or not user_id:
+            return None
+
+        return User(username, password, user_id)
 
     @staticmethod
     def login(username: str, password: str):
-        cursor, _ = get_cursor()
-        cursor.execute("SELECT * FROM Users WHERE username = %s AND password = %s", (username, password))
-        user_data = cursor.fetchone()
-        cursor.close()
+
+        user_data = fetch_row("SELECT * FROM Users WHERE username = %s AND password = %s", (username, password))
 
         if user_data:
             return User(username, password, user_data['id'])
@@ -41,10 +39,8 @@ class User:
 
 
     def to_json(self):
-        cursor, _ = get_cursor()
-        cursor.execute("SELECT * FROM Users WHERE id = %s", (self.id,))
-        user_data = cursor.fetchone()
-        cursor.close()
+
+        user_data = fetch_row("SELECT * FROM Users WHERE id = %s", (self.id,))
 
         if not user_data:
             return None
@@ -70,10 +66,9 @@ class User:
 
 
 def get_user_by_id(user_id: int):
-    cursor, _ = get_cursor()
-    cursor.execute("SELECT * FROM Users WHERE id = %s", (user_id,))
-    user_data = cursor.fetchone()
-    cursor.close()
+
+
+    user_data = fetch_row("SELECT * FROM Users WHERE id = %s", (user_id,))
 
     if user_data:
         return User(

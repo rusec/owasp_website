@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 import jwt_utils
 import server.database.employee as employee_db
 import server.database.login as login_db
-from server.lib.employee import Employee, get_employee_by_id
+
 employee_bp = Blueprint('employee', __name__, url_prefix='/api/employee')
 
 @employee_bp.route('/login', methods=['POST'])
@@ -14,16 +14,18 @@ def login():
     if not username or not password and type(username) != str and type(password) != str:
         return jsonify({'message': 'Username and password are required!'}), 400
 
-    employee = Employee.login(username, password)
-    if not employee:
+    if login_db.login_employee(username, password) == False:
         return jsonify({'message': 'Invalid credentials!'}), 401
 
+    employee = employee_db.get_employee(username)
+    if not employee:
+        return jsonify({'message': 'Employee not found!'}), 404
 
     # Generate JWT token
     token = jwt_utils.encode({
-        'username': employee.username,
-        'privilege': employee.privilege ,
-        'employee_id': employee.employee_id,
+        'username': username,
+        'privilege': employee['privilege'] ,
+        'employee_id': employee['id'],
         'role': 'employee',
     })
 
@@ -57,15 +59,13 @@ def get_employee():
     payload = check_employee_login()
     if type(payload) != dict:
         return payload
-    employee_id = payload['employee_id']
-
-    employee_id_args = request.args.get('employee_id')
-
-    if employee_id_args and (employee_id_args != employee_id):
+    username = payload['employee_id']
+    username_args = request.args.get('username')
+    if username_args and username_args != username:
         return jsonify({'message': 'Unauthorized!'}), 401
 
-    employee = get_employee_by_id(employee_id_args) 
+    employee = employee_db.get_employee(username_args or username)
     if employee:
-        return jsonify(employee.to_json()), 200
+        return jsonify(employee), 200
     else:
         return jsonify({'message': 'Employee not found!'}), 404
