@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-800 dark:bg-gray-900 dark:text-white font-sans">
 
-      {/* Top Navigation Bar */}
+      {/* Navigation Bar */}
       <header className="w-full px-6 py-4 flex justify-between items-center bg-blue-600 text-white shadow-md">
         <div className="flex items-center gap-2">
           <Image src="/next.svg" alt="logo" width={32} height={32} />
@@ -25,9 +25,9 @@ export default function Home() {
         </div>
         <nav className="flex gap-6 text-sm sm:text-base">
           <a href="#" className="hover:underline">Home</a>
-          <a href="#" className="hover:underline">Our Employees</a>
+          <a href="about" className="hover:underline">Our Employees</a>
           <a href="login" className="hover:underline">Login</a>
-          <a href="#" className="hover:underline">Contact</a>
+          <a href="forgot" className="hover:underline">Forgot Password</a>
         </nav>
       </header>
 
