@@ -38,7 +38,7 @@ export default function Login() {
           <span className="text-lg font-bold">Bank</span>
         </div>
         <nav className="flex gap-6 text-sm sm:text-base">
-          <a href="#" className="hover:underline">Home</a>
+          <a href=".." className="hover:underline">Home</a>
           <a href="about" className="hover:underline">Our Employees</a>
           <a href="login" className="hover:underline">Login</a>
           <a href="forgot" className="hover:underline">Forgot Password</a>
