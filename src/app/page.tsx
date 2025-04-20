@@ -41,13 +41,13 @@ export default function Home() {
         </p>
         <div className="flex gap-4 mt-6 flex-wrap justify-center">
           <a
-            href="#"
+            href="login"
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow transition"
           >
             Login
           </a>
           <a
-            href="#"
+            href="about"
             className="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-800 font-semibold py-3 px-6 rounded-full transition"
           >
             Learn More
