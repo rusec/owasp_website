@@ -26,7 +26,7 @@ export default function Home() {
         <nav className="flex gap-6 text-sm sm:text-base">
           <a href="#" className="hover:underline">Home</a>
           <a href="#" className="hover:underline">Our Employees</a>
-          <a href="#" className="hover:underline">Login</a>
+          <a href="login" className="hover:underline">Login</a>
           <a href="#" className="hover:underline">Contact</a>
         </nav>
       </header>
