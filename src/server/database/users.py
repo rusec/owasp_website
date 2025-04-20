@@ -1,10 +1,8 @@
 import random
-from db import get_cursor
 import utils
 
-
 def get_user_by_id(user_id):
-
+    from db import get_cursor
     cursor, _ = get_cursor(dictionary=True)
     query = "SELECT * FROM users WHERE id = %s"
     cursor.execute(query, (user_id,))
@@ -35,6 +33,7 @@ def get_user_by_id(user_id):
     }
 
 def register_user(username, password, email, first_name, last_name, phone, address, city, state, zip, country):
+    from db import get_cursor
 
     cursor, sql_db = get_cursor(dictionary=True)
 
@@ -80,6 +79,8 @@ def register_user(username, password, email, first_name, last_name, phone, addre
     return user_id, account_number
 
 def create_user_account(user_id):
+    from db import get_cursor
+
     account_number = utils.generate_account_number()
     account_type = 'savings'
     in_vault = False

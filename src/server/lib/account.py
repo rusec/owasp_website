@@ -1,6 +1,6 @@
-from src.server.database.accounts import get_account_internal, create_account, transfer_funds,get_account
-from src.server.database.db import do_query, fetch_row, fetch_all
-from server.lib.vault import forward_account_to_vault_server
+from database.accounts import get_account_internal, create_account, transfer_funds,get_account
+
+from lib.vault import forward_account_to_vault_server
 
 class Account:
     def __init__(self, account_number, user_id, balance):
@@ -9,7 +9,7 @@ class Account:
         self.balance = balance
 
     def get_balance(self):
-
+        from database.db import fetch_row
         balance = fetch_row("SELECT balance FROM accounts WHERE account_number = %s", (self.account_number,))
         return balance['balance'] if balance else None
 
@@ -20,6 +20,7 @@ class Account:
         """
         Transfer the account to the vault server.
         """
+        from database.db import do_query
         # Check if the account is already in the vault
         account = get_account_internal(account_number)
         if not account:
@@ -41,7 +42,13 @@ class Account:
         """
         DONT USE THIS TO MAKE ACCOUNTS, AN ACCOUNT IS MADE WHEN A USER IS MADE
         """
-        return create_account(account_number, account_type, in_vault, user_id)
+        from database.db import insert_query
+        account = insert_query("""
+        INSERT INTO accounts (account_number, account_type, in_vault, user_id)
+        VALUES (%s, %s, %s, %s)
+        """, (account_number, account_type, in_vault, user_id))
+
+        return account
     @staticmethod
     def get_account(account_number, user_id):
         account = get_account(account_number, user_id)
@@ -50,6 +57,7 @@ class Account:
         return Account(account['account_number'], account['user_id'], account['balance'])
 
     def get_transactions(self):
+        from database.db import fetch_all
         transactions = fetch_all("SELECT * FROM transactions WHERE account_number = %s", (self.account_number,))
         return transactions if transactions else None
 

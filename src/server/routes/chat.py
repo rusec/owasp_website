@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request,stream_with_context, Response
-from server.lib.chat import chatroom
-from server.routes.employee import check_employee_login
-from server.lib.employee import get_employee_by_id
+from lib.chat import chatroom
+from routes.employee import check_employee_login
+from lib.employee import get_employee_by_id
 
 chat_bp = Blueprint('chat', __name__, url_prefix='/api/chat')
 

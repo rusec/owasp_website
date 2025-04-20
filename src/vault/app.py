@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
-from vault.routes.account import account_bp
+from routes.account import account_bp
 app = Flask(__name__)
 
 
-app.register_blueprint(account_bp, url_prefix='/')
+app.register_blueprint(account_bp)
 
 
 @app.route('/health', methods=['GET'])

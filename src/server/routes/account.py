@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 from users import check_login
-import server.database.accounts as account_db
-import server.database.users as user_db
-from server.lib.user import get_user_by_id
+import database.accounts as account_db
+import database.users as user_db
+from lib.user import get_user_by_id
 
 
 account_bp = Blueprint('account', __name__, url_prefix='/api/account')
@@ -27,7 +27,6 @@ def transfer():
 
     if amount <= 0:
         return jsonify({'message': 'Amount must be greater than 0!'}), 400
-
 
     user_id = user['user_id']
 

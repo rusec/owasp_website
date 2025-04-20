@@ -1,4 +1,4 @@
-from vault.database.db import fetch_row, do_query
+from database.db import fetch_row, do_query
 
 class Account():
     def __init__(self, account_number, balance):

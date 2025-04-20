@@ -1,6 +1,5 @@
-from src.server.database.db import fetch_row, get_cursor
-from src.server.database.users import register_user
-from account import Account
+from lib.account import Account
+
 class User:
     def __init__(self, username: str, password: str, user_id: int | None = None, email: str = None, first_name: str = None, last_name: str = None, phone: str = None, address: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
         self.username = username
@@ -28,6 +27,7 @@ class User:
     
     @staticmethod
     def register(username: str, password: str, email: str, first_name: str, last_name: str, phone: str, address: str, city: str, state: str, zip_code: str, country: str):
+        from database.users import register_user
         result = register_user(username, password, email, first_name, last_name, phone, address, city, state, zip_code, country)
         if not result:
             return None
@@ -40,6 +40,7 @@ class User:
 
     @staticmethod
     def login(username: str| None, password: str, email: str = None):
+        from database.db import fetch_row
 
         if not password: 
             return None
@@ -58,6 +59,7 @@ class User:
 
 
     def to_json(self):
+        from database.db import fetch_row
 
         user_data = fetch_row("SELECT * FROM Users WHERE id = %s", (self.id,))
 
@@ -85,7 +87,7 @@ class User:
 
 
 def get_user_by_id(user_id: int):
-
+    from database.db import fetch_row
 
     user_data = fetch_row("SELECT * FROM Users WHERE id = %s", (user_id,))
 

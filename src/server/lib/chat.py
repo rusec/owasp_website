@@ -1,10 +1,10 @@
-from server.database.db import get_cursor, do_query, fetch_row,fetch_all
 
 class Chat():
     def __init__(self):
         self.chat_queue = []
 
     def add_message(self, message):
+        from database.db import do_query
         self.chat_queue.append(message)
         # Here you would also save the message to your database or message queue
 
@@ -12,6 +12,8 @@ class Chat():
         print(f"New message from {message['sender_id']}: {message['message']}")
 
     def get_history(self):
+        from database.db import  fetch_all
+
         # This method would fetch chat history from your database or message queue
         messages = fetch_all("SELECT * FROM chat ORDER BY timestamp DESC LIMIT 100")
         return messages

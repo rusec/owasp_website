@@ -3,19 +3,26 @@ services:
         build:
             context: .
         ports:
-            - "8080:3000"
+            - "8080:5000"
         environment:
-            - MYSQL_HOST=mysql
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=password
-            - MYSQL_NAME=owasp
-            - MYSQL_PORT=3306
-        volumes:
-            - ./owasp:/usr/src/owasp
+            MYSQL_HOST: mysql
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+            MYSQL_DATABASE: owasp
+            VAULT_ADDR: http://vault:5001
         networks:
             - mynetwork
+        healthcheck:
+            test: wget -O - 'http://127.0.0.1:5000/health'
+            start_period: 5s
+            interval: 10s
+            timeout: 5s
+            retries: 5
         depends_on:
-            - mysql
+            mysql:
+                condition: service_healthy
+            vault:
+                condition: service_healthy
     mysql:
         image: mysql:latest
         environment:
@@ -23,8 +30,49 @@ services:
             MYSQL_DATABASE: owasp
             MYSQL_USER: user
             MYSQL_PASSWORD: password
-        ports:
-            - "3306:3306"
+        healthcheck:
+            test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+            start_period: 5s
+            interval: 5s
+            timeout: 5s
+            retries: 55
+        networks:
+            - mynetwork
+
+    vault:
+        build:
+            context: ./src/vault
+        networks:
+            - mynetwork
+        depends_on:
+            mysqlvault:
+                condition: service_healthy
+        volumes:
+            - ./src/vault:/usr/src/vault
+        environment:
+            MYSQL_HOST: mysqlvault
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+            MYSQL_DATABASE: vault
+        healthcheck:
+            test: wget -O - 'http://127.0.0.1:5001/health'
+            start_period: 5s
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    mysqlvault:
+        image: mysql:latest
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: vault
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+        healthcheck:
+            test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+            start_period: 5s
+            interval: 5s
+            timeout: 5s
+            retries: 55
         networks:
             - mynetwork
 volumes:

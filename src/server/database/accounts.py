@@ -1,22 +1,16 @@
 from random_address.random_address import Dict
-import server.config as config
-import requests
-import db as db
-from server.lib.vault import forward_to_vault_server, forward_transfer_to_vault_server, add_amount_to_vault, remove_amount_from_vault
+from lib.vault import forward_to_vault_server, forward_transfer_to_vault_server, add_amount_to_vault, remove_amount_from_vault
+
+
 def create_account(account_number, account_type, in_vault, user_id):
-
-    account = db.insert_query("""
-        INSERT INTO accounts (account_number, account_type, in_vault, user_id)
-        VALUES (%s, %s, %s, %s)
-    """, (account_number, account_type, in_vault, user_id))
-
-    return account
+    from db import insert_query
+    
 
 
 
 def get_account_internal(account_number:str):
-
-    account = db.fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
+    from db import fetch_row
+    account = fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
 
     if not account :
         return None
@@ -43,7 +37,9 @@ def get_account(account_number:str, requested_user_id:str):
     """
     Fetch account information if user is authorized and account is not in vault.
     """
-    account = db.fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
+    from db import fetch_row
+
+    account = fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
 
     if not account:
         return None
@@ -72,14 +68,12 @@ def get_account(account_number:str, requested_user_id:str):
     }
 
 
-
-
 def transfer_funds(from_account, to_account, amount):
     """
     Transfer funds between two accounts. If either account is in the vault, forward the request to the vault server.
     Ensure that the user has access to both accounts.
     """
-
+    from db import get_cursor
     # Check if both accounts are in vault
     from_account_data = get_account_internal(from_account)
     to_account_data = get_account_internal(to_account)
@@ -101,7 +95,7 @@ def transfer_funds(from_account, to_account, amount):
 
         return True
 
-    cursor, sql_db = db.get_cursor()
+    cursor, sql_db = get_cursor()
 
     if from_account_data['in_vault']:
         # Move amount from vault to local account
@@ -150,8 +144,8 @@ def log_transfer(from_account, to_account, amount):
         VALUES (%s, %s, %s, NOW())
     """
 
-    insert_query = db.insert_query(query, (from_account, 'withdrawal', amount))
-    insert_query = db.insert_query(query, (to_account, 'deposit', amount))
+    insert_query = insert_query(query, (from_account, 'withdrawal', amount))
+    insert_query = insert_query(query, (to_account, 'deposit', amount))
     if not insert_query:
         return False
     return True
@@ -160,6 +154,7 @@ def log_transfer(from_account, to_account, amount):
 
 def add_amount(account_number, amount):
     # Check if the account is in vault
+    from db import get_cursor
     account_data = get_account_internal(account_number)
     if not account_data:
         return False
@@ -168,7 +163,7 @@ def add_amount(account_number, amount):
         # Forward the request to the vault server
         return add_amount_to_vault(account_number, amount)
     else:
-        cursor, sql_db = db.get_cursor()
+        cursor, sql_db = get_cursor()
         # Update the local account balance
         query = "UPDATE accounts SET balance = balance + %s WHERE account_number = %s"
         cursor.execute(query, (amount, account_number))

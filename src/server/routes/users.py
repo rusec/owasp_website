@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 import jwt_utils
 import random_address
-from server.lib.user import User, get_user_by_id
+from lib.user import User, get_user_by_id
 users_bp = Blueprint('users', __name__, url_prefix='/api/user')
 
 
