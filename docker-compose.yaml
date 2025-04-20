@@ -9,9 +9,11 @@ services:
             MYSQL_USER: user
             MYSQL_PASSWORD: password
             MYSQL_DATABASE: owasp
-            VAULT_ADDR: http://vault:5001
+            VAULT_SERVER_URL: http://vault:5001
         networks:
             - mynetwork
+        volumes:
+            - ./src/server:/usr/src/owasp
         healthcheck:
             test: wget -O - 'http://127.0.0.1:5000/health'
             start_period: 5s

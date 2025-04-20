@@ -70,14 +70,13 @@ def get_transactions():
     return jsonify(transactions), 200
 
 
-@account_bp.route('/', methods=['GET'])
-@account_bp.route('/<string:account_number>', methods=['GET'])
-def get_account():
+@account_bp.route('/<account_number>', methods=['GET'])
+def get_account(account_number):
     user_payload = check_login()
     if type(user_payload) != dict:
         return user_payload
     user_id = user_payload['user_id']
-    account_number_args = request.args.get('account_number')
+    
 
     user = user_db.get_user_by_id(user_id)
 
@@ -87,8 +86,8 @@ def get_account():
     # Still uses older get_account function without user id check
     account = account_db.get_account(user['account_number'], user_id)
     # (SSRF) because the get account function does not check if the user id matches the account for vault accounts
-    if account_number_args and account_number_args != user['account_number']:
-        account = account_db.get_account(account_number_args,user_id)
+    if account_number and account_number != user['account_number']:
+        account = account_db.get_account(account_number,user_id)
 
     if not account:
         return jsonify({'message': 'Account not found!'}), 404

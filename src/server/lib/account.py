@@ -1,4 +1,4 @@
-from database.accounts import get_account_internal, create_account, transfer_funds,get_account
+from database.accounts import get_account_internal, transfer_funds,get_account
 
 from lib.vault import forward_account_to_vault_server
 
@@ -10,31 +10,32 @@ class Account:
 
     def get_balance(self):
         from database.db import fetch_row
-        balance = fetch_row("SELECT balance FROM accounts WHERE account_number = %s", (self.account_number,))
-        return balance['balance'] if balance else None
+        account = fetch_row("SELECT balance FROM accounts WHERE account_number = %s", (self.account_number,))
+        return account['balance'] if account else None
 
     def transfer_funds(self, to_account_number, amount):
         return transfer_funds(self.account_number, to_account_number, amount)
 
-    def transfer_account_to_vault(self, account_number):
+    def transfer_to_vault(self):
         """
         Transfer the account to the vault server.
         """
         from database.db import do_query
         # Check if the account is already in the vault
-        account = get_account_internal(account_number)
+        account = get_account_internal(self.account_number)
         if not account:
             return None
-        if account['in_vault'] == 1:
+    
+        if account.get('in_vault', 0) == 1:
             return None
 
         # Transfer the account to the vault server
 
-        result = forward_account_to_vault_server(account_number)
+        result = forward_account_to_vault_server(self.account_number, self.balance)
         if not result:
             return None
 
-        return do_query("UPDATE accounts SET in_vault = 1 WHERE account_number = %s", (account_number,))
+        return do_query("UPDATE accounts SET in_vault = 1 WHERE account_number = %s", (self.account_number,))
     
 
     @staticmethod

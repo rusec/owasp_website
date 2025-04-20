@@ -10,8 +10,8 @@ class Account():
         """
         Create a new account with the given account number and balance.
         """
-        query = "INSERT INTO accounts (account_number, balance) VALUES (%s, %s)"
-        do_query(query, (account_number, balance))
+        query = "INSERT INTO accounts (account_number, balance, in_vault) VALUES (%s, %s, %s)"
+        do_query(query, (account_number, balance, 1))
         return Account(account_number, balance)
 
     @staticmethod

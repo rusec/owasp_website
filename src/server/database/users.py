@@ -1,8 +1,7 @@
 import random
-import utils
 
 def get_user_by_id(user_id):
-    from db import get_cursor
+    from database.db import get_cursor
     cursor, _ = get_cursor(dictionary=True)
     query = "SELECT * FROM users WHERE id = %s"
     cursor.execute(query, (user_id,))
@@ -33,7 +32,7 @@ def get_user_by_id(user_id):
     }
 
 def register_user(username, password, email, first_name, last_name, phone, address, city, state, zip, country):
-    from db import get_cursor
+    from database.db import get_cursor
 
     cursor, sql_db = get_cursor(dictionary=True)
 
@@ -48,7 +47,7 @@ def register_user(username, password, email, first_name, last_name, phone, addre
         return rowcount
 
     query = """
-        INSERT INTO users (username, password, email, first_name, last_name, phone, address, city, state, zip, country)
+        INSERT IGNORE INTO users (username, password, email, first_name, last_name, phone, address, city, state, zip, country)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
@@ -79,9 +78,10 @@ def register_user(username, password, email, first_name, last_name, phone, addre
     return user_id, account_number
 
 def create_user_account(user_id):
-    from db import get_cursor
+    from database.db import get_cursor
+    from database.utils import generate_account_number
 
-    account_number = utils.generate_account_number()
+    account_number = generate_account_number()
     account_type = 'savings'
     in_vault = False
     account_status = 'active'
@@ -98,6 +98,8 @@ def create_user_account(user_id):
     cursor.close()
     # Create a new account for the user
     cursor, sql_db = get_cursor(dictionary=True)
+
+    print(f"Creating account for user {user_id} with account number {account_number}")
 
     query = """
         INSERT INTO accounts (account_number, account_type, in_vault, account_status, balance, user_id)

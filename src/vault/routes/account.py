@@ -32,17 +32,17 @@ def transfer():
 
 @account_bp.route('/accounts/<account_number>', methods=['GET'])
 def get_account(account_number):
-    account_number = request.args.get('account_number')
-
     account = Account.get_account(account_number)
     if not account:
         return jsonify({'message': 'Account not found!'}), 404
     
 
-@account_bp.route('/accounts/<account_number>', methods=['POST'])
-def transfer_account_to_vault(account_number):
+@account_bp.route('/create', methods=['POST'])
+def transfer_account_to_vault():
+    
     data = request.get_json()
     account_number = data.get('account_number')
+    balance = data.get('balance', 0)
 
     if not account_number:
         return jsonify({'message': 'Account number is required!'}), 400
@@ -51,7 +51,7 @@ def transfer_account_to_vault(account_number):
     if account:
         return jsonify({'message': 'Account already Exists'}), 409
     
-    result = Account.create_account(account_number)
+    result = Account.create_account(account_number,balance)
     if not result:
         return jsonify({'message': 'Account creation failed!'}), 500
     

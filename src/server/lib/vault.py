@@ -4,7 +4,7 @@ import requests
 def forward_to_vault_server(account_number):
     # This function should forward the request to the vault server
 
-    url = f"{config.VAULT_SERVER_URL}/api/account/{account_number}"
+    url = f"{config.VAULT_SERVER_URL}/api/account/accounts/{account_number}"
 
     response = requests.get(url, timeout=5)
     if response.status_code == 200:
@@ -62,13 +62,13 @@ def remove_amount_from_vault(account_number, amount):
     else:
         return None
     
-def forward_account_to_vault_server(account_number):
+def forward_account_to_vault_server(account_number, balance):
     # This function should forward the request to the vault server, creating the account in vault
 
-    url = f"{config.VAULT_SERVER_URL}/api/account/{account_number}"
+    url = f"{config.VAULT_SERVER_URL}/api/account/create"
 
-    response = requests.post(url, timeout=5)
-    if response.status_code == 200:
+    response = requests.post(url, timeout=5, json={"account_number": account_number, "balance": balance})
+    if response.status_code == 201:
         return response.json()
     else:
         return None

@@ -18,12 +18,12 @@ class Employee :
 
     @staticmethod
     def register(username, password, email, first_name, last_name, avatar_url="/static/images/default_avatar.png"):
-        from database.db import do_query
+        from database.db import insert_query
         if not username or not password or not email:
             return None
         if not first_name or not last_name:
             return None
-        employee_id = do_query("INSERT INTO Employees (username, password, email, first_name, last_name, avatar_url) VALUES (%s, %s, %s, %s, %s, %s)", (username, password, email, first_name, last_name, avatar_url))
+        employee_id = insert_query("INSERT INTO employees (username, password, email, first_name, last_name, avatar_url) VALUES (%s, %s, %s, %s, %s, %s)", (username, password, email, first_name, last_name, avatar_url))
         if not employee_id:
             return None
         return Employee(
@@ -42,7 +42,7 @@ class Employee :
     def get_employee_employee_id(employee_id):
         from database.db import  fetch_row
 
-        employee_data = fetch_row("SELECT * FROM Employees WHERE id = %s", (employee_id,))
+        employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (employee_id,))
         if not employee_data:
             return None
         return Employee(
@@ -66,9 +66,9 @@ class Employee :
         if not username and not email:
             return None
         if username:
-            employee_data = fetch_row("SELECT * FROM Employees WHERE username = %s AND password = %s", (username, password))
+            employee_data = fetch_row("SELECT * FROM employees WHERE username = %s AND password = %s", (username, password))
         elif email:
-            employee_data = fetch_row("SELECT * FROM Employees WHERE email = %s AND password = %s", (email, password))
+            employee_data = fetch_row("SELECT * FROM employees WHERE email = %s AND password = %s", (email, password))
         if not employee_data:
             return None
         return Employee(
@@ -89,14 +89,19 @@ class Employee :
         if not new_password:
             raise ValueError("Password cannot be empty.")
         self.password = new_password
-        do_query("UPDATE Employees SET password = %s WHERE employee_id = %s", (self.password, self.employee_id))
+        do_query("UPDATE employees SET password = %s WHERE id = %s", (self.password, self.employee_id))
 
     def update_privilege(self, new_privilege):
+        """
+        Update the privilege of the employee.
+        :param new_privilege: The new privilege to set. Must be one of ['admin', 'user', 'trader'].
+        """
+    
         from database.db import do_query
         if new_privilege not in self.privileges:
             raise ValueError(f"Invalid privilege: {new_privilege}. Must be one of {self.privileges}.")
         self.privilege = new_privilege
-        do_query("UPDATE Employees SET privilege = %s WHERE employee_id = %s", (self.privilege, self.employee_id))
+        do_query("UPDATE employees SET privilege = %s WHERE id = %s", (self.privilege, self.employee_id))
 
     
     def chat(self, message):
@@ -109,7 +114,7 @@ class Employee :
 
     def to_json(self):
         from database.db import fetch_row
-        employee_data = fetch_row("SELECT * FROM Employees WHERE id = %s", (self.employee_id,))
+        employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (self.employee_id,))
 
         if not employee_data:
             return None
@@ -129,7 +134,7 @@ class Employee :
 
 def get_employee_by_id(employee_id):
     from database.db import fetch_row
-    employee_data = fetch_row("SELECT * FROM Employees WHERE id = %s", (employee_id,))
+    employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (employee_id,))
     
     if not employee_data:
         return None

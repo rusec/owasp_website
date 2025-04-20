@@ -56,10 +56,8 @@ def check_employee_login():
     except jwt_utils.jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token!'}), 401
 
-@employee_bp.route('/', methods=['GET'])
 @employee_bp.route('/<int:employee_id>', methods=['GET'])
-def get_employee_endpoint():
-    employee_id = request.args.get('employee_id')
+def get_employee_endpoint(employee_id):
     employee = Employee.get_employee_employee_id(employee_id)
     if employee:
         return jsonify(employee.to_json()), 200

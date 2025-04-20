@@ -15,7 +15,6 @@ cursor.execute("CREATE DATABASE IF NOT EXISTS vault")
 cursor.execute("""
             CREATE TABLE IF NOT EXISTS accounts (
                 account_number VARCHAR(255) PRIMARY KEY,
-                account_status VARCHAR(255) NOT NULL,
                 balance DECIMAL(10, 2) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

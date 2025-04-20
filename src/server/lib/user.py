@@ -47,9 +47,9 @@ class User:
         if not username and not email:
             return None
         if username:
-            user_data = fetch_row("SELECT * FROM Users WHERE username = %s AND password = %s", (username, password))
+            user_data = fetch_row("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
         elif email:
-            user_data = fetch_row("SELECT * FROM Users WHERE email = %s AND password = %s", (email, password))
+            user_data = fetch_row("SELECT * FROM users WHERE email = %s AND password = %s", (email, password))
         
         if not user_data:
             return None
@@ -61,7 +61,7 @@ class User:
     def to_json(self):
         from database.db import fetch_row
 
-        user_data = fetch_row("SELECT * FROM Users WHERE id = %s", (self.id,))
+        user_data = fetch_row("SELECT * FROM users WHERE id = %s", (self.id,))
 
         if not user_data:
             return None
@@ -89,7 +89,7 @@ class User:
 def get_user_by_id(user_id: int):
     from database.db import fetch_row
 
-    user_data = fetch_row("SELECT * FROM Users WHERE id = %s", (user_id,))
+    user_data = fetch_row("SELECT * FROM users WHERE id = %s", (user_id,))
 
     if user_data:
         return User(

@@ -1,7 +1,5 @@
 import mysql.connector
 import config
-import time
-from lib.vault import check_vault
 from lib.account import Account
 from lib.user import User
 from lib.employee import Employee
@@ -20,7 +18,7 @@ cursor = sql_db.cursor()
 
 cursor.execute("""
   CREATE TABLE IF NOT EXISTS accounts (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id INT(10) AUTO_INCREMENT PRIMARY KEY,
         account_number INT NOT NULL UNIQUE,
         account_type ENUM('savings', 'checking') NOT NULL,
         in_vault BOOLEAN NOT NULL DEFAULT FALSE,
@@ -47,7 +45,7 @@ cursor.execute("""
         zip VARCHAR(255),
         country VARCHAR(255),
         status ENUM('active', 'inactive') DEFAULT 'active',
-        account_number INT,
+        account_number INT(10),
         FOREIGN KEY (account_number) REFERENCES accounts(account_number),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -58,7 +56,7 @@ cursor.execute("""
 cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        account_number INT NOT NULL,
+        account_number INT(10) NOT NULL,
         transaction_type ENUM('deposit', 'withdrawal') NOT NULL,
         amount DECIMAL(10, 2) NOT NULL,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -134,7 +132,7 @@ def get_db():
 
 def get_cursor(dictionary=True):
     sql_db = get_db()
-    cursor = sql_db.cursor(dictionary=dictionary)
+    cursor = sql_db.cursor(dictionary=dictionary, )
     return cursor, sql_db
 
 
@@ -148,22 +146,10 @@ def init_db(force=False):
     if row and not force:
         print("Database already initialized")
         return False
-    
-    checks = 0
-    while True:
-        result = check_vault() 
-        if result:
-            break
-        checks += 1
-        if checks > 5:
-            print("ERROR: Unable to connect to vault server")
-            return False
-        print("ERROR: Unable to connect to vault server, retrying in 1 second")
-        time.sleep(1)
 
     accounts:list[Account] = []
     # make 20 users with random data
-    for i in range(20):
+    for i in range(200):
         fake = Faker()
         username = fake.user_name()
         password = fake.password()
@@ -171,12 +157,12 @@ def init_db(force=False):
         first_name = fake.first_name()
         last_name = fake.last_name()
         phone = fake.phone_number()
-        address = random_address.real_random_address_by_city('New Brunswick')
-        address_1 = address['address1']
-        city = address['city']
-        state = address['state']
-        zip_code = address['zip']
-        country = address['country']
+        address = random_address.real_random_address()
+        address_1 = address.get('address1', '123 Main St')
+        city = address.get('city', 'New York')
+        state = address.get('state', 'NY')
+        zip_code = address.get('postalCode', '10001')
+        country = "US"
         user = User.register(
             username,
             password,
@@ -200,14 +186,14 @@ def init_db(force=False):
 
         result = random.randint(0, 1)
         if result == 1:
-            result = account.transfer_account_to_vault()
+            result = account.transfer_to_vault()
             if not result:
                 print("ERROR: Unable to transfer account to vault")
                 continue
         print(f"Created user {username} with account number {account.account_number}")
 
     # create a transaction for the user
-    for j in range(50):
+    for j in range(200):
         account_from_index = random.randint(0, len(accounts) - 1)
         account_to_index = random.randint(0, len(accounts) - 1)
         amount = random.randint(1, 1000)
@@ -227,7 +213,7 @@ def init_db(force=False):
 
 
     # create employees with random data
-    for i in range(5):
+    for i in range(15):
         fake = Faker()
         username = fake.user_name()
         password = fake.password()
@@ -246,7 +232,13 @@ def init_db(force=False):
         if not employee:
             print("ERROR: Unable to create employee")
             continue
-        print(f"Created employee {username} with id {employee.id}") 
+        
+        should_update = random.randint(0, 1)
+        if should_update == 1:
+            employee.update_privilege('trader')
+            print(f"Updated password for employee {username}")
+
+        print(f"Created employee {username} with id {employee.employee_id}") 
 
 
     init_query = "INSERT INTO init (flag) VALUES (%s)"
@@ -271,7 +263,7 @@ def do_query(query, data=None):
         cursor.execute(query)
     sql_db.commit()
     cursor.close()
-    return cursor.fetchall()
+    return cursor.rowcount > 0
 
 def fetch_row(query, data=None):
     cursor, _ = get_cursor()
