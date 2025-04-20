@@ -1,26 +1,38 @@
-FROM node:23-slim	
+FROM node:22-alpine AS builder
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install app dependencies
-COPY server/src/package*.json ./
+COPY package*.json ./
 RUN npm install 
 RUN npm install -g typescript ts-node
-RUN npm install -g nodemon
 
-# Bundle app source
-COPY server/src/ src/
-COPY server/tsconfig.json ./
+COPY ./src/app ./src/app
+COPY ./public ./public
+COPY ./next.config.ts ./
+COPY ./tsconfig.json ./
+COPY ./next-env.d.ts ./
+COPY ./package.json ./
+COPY ./eslint.config.mjs ./
+COPY ./postcss.config.mjs ./
 
 # build the app
 RUN npm run build
+RUN ls -l /app/build
 
-COPY server/public/ public/
+FROM python:alpine AS runner
 
-ENV PORT=3000
-ENV NODE_ENV=production
-EXPOSE 3000
-RUN ["npm", "run", "start"]
+# Create app directory
+WORKDIR /usr/src/owasp
+
+COPY --from=builder /app/build /usr/src/owasp/static
+
+COPY src/server/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./src/server .
+
+CMD [ "python" , "app.py", "--host=0.0.0.0", "--port=3000" ]
 
 

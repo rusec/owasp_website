@@ -8,16 +8,9 @@ my_sql = mysql.connector.connect(
     database=config.MYSQL_DATABASE,
 )
 
+cursor = my_sql.cursor(dictionary=True)
 
-def get_cursor(dictionary=False):
-    """
-    Get a cursor for the database connection.
-    """
-    if dictionary:
-        return my_sql.cursor(dictionary=True), my_sql
-    return my_sql.cursor(), my_sql
-
-cursor, _ = get_cursor()
+cursor.execute("CREATE DATABASE IF NOT EXISTS vault")
 
 cursor.execute("""
             CREATE TABLE IF NOT EXISTS accounts (
@@ -29,9 +22,18 @@ cursor.execute("""
                 in_vault BOOLEAN DEFAULT FALSE
             )""")
 
-
 my_sql.commit()
 cursor.close()
+
+
+def get_cursor(dictionary=False):
+    """
+    Get a cursor for the database connection.
+    """
+    if dictionary:
+        return my_sql.cursor(dictionary=True), my_sql
+    return my_sql.cursor(), my_sql
+
 
 
 def create_account(account_number, account_type, in_vault, user_id):

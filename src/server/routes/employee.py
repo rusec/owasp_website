@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 import jwt_utils
-import server.database.employee as employee_db
-from server.lib.employee import Employee 
-import server.database.login as login_db
+# import server.database.employee as employee_db
+
+from lib.employee import Employee 
 
 employee_bp = Blueprint('employee', __name__, url_prefix='/api/employee')
 
@@ -58,17 +58,10 @@ def check_employee_login():
 
 @employee_bp.route('/', methods=['GET'])
 @employee_bp.route('/<int:employee_id>', methods=['GET'])
-def get_employee():
-    payload = check_employee_login()
-    if type(payload) != dict:
-        return payload
-    username = payload['employee_id']
-    username_args = request.args.get('username')
-    if username_args and username_args != username:
-        return jsonify({'message': 'Unauthorized!'}), 401
-
-    employee = employee_db.get_employee(username_args or username)
+def get_employee_endpoint():
+    employee_id = request.args.get('employee_id')
+    employee = Employee.get_employee_employee_id(employee_id)
     if employee:
-        return jsonify(employee), 200
+        return jsonify(employee.to_json()), 200
     else:
         return jsonify({'message': 'Employee not found!'}), 404

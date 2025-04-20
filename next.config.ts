@@ -3,8 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     /* config options here */
     output: "export",
-
-    distDir: "./src/server/static",
+    distDir: "./build",
     async rewrites() {
         return [
             {

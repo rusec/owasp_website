@@ -1,7 +1,8 @@
-from Flask import Blueprint, request, jsonify
-from vault.lib.account import Account
-account_bp = Blueprint('account', __name__, url_prefix='/')
+from flask import Blueprint, request, jsonify
+from lib.account import Account
 
+
+account_bp = Blueprint('account', __name__, url_prefix='/api/account')
 
 @account_bp.route('/transfer', methods=['POST'])
 def transfer():
@@ -29,7 +30,7 @@ def transfer():
 
     return jsonify({'message': 'Transfer successful!'}), 200
 
-@account_bp.route('/accounts/<str:account_number>', methods=['GET'])
+@account_bp.route('/accounts/<account_number>', methods=['GET'])
 def get_account(account_number):
     account_number = request.args.get('account_number')
 
@@ -38,7 +39,7 @@ def get_account(account_number):
         return jsonify({'message': 'Account not found!'}), 404
     
 
-@account_bp.route('/accounts/<str:account_number>', methods=['POST'])
+@account_bp.route('/accounts/<account_number>', methods=['POST'])
 def transfer_account_to_vault(account_number):
     data = request.get_json()
     account_number = data.get('account_number')
