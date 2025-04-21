@@ -10,6 +10,7 @@ services:
             MYSQL_PASSWORD: password
             MYSQL_DATABASE: owasp
             VAULT_SERVER_URL: http://vault:5001
+            JWT_SECRET: i@9|[D"/L(#9(=CJh2C=JIl5{@bFY9Kkg"{X2l-Y-?9qa@fX9@c6oA|R'Zz=,?.V
         networks:
             - mynetwork
         volumes:

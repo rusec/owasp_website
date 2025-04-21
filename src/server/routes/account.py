@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from users import check_login
+from routes.users import check_login
 import database.accounts as account_db
 import database.users as user_db
 from lib.user import get_user_by_id
@@ -22,13 +22,16 @@ def transfer():
     if  not account_to or not amount:
         return jsonify({'message': 'Account from, account to and amount are required!'}), 400
 
-    if  type(account_to) != str or type(amount) != float:
-        return jsonify({'message': 'Account from and account to must be strings and amount must be a float!'}), 400
+
+    if  type(account_to) != int or type(amount) != float:
+        return jsonify({'message': 'Account from and account to must be ints and amount must be a float! '}), 400
 
     if amount <= 0:
         return jsonify({'message': 'Amount must be greater than 0!'}), 400
 
-    user_id = user['user_id']
+    user_id = user.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'User ID not found!'}), 400
 
     user = get_user_by_id(user_id)
     if not user:
@@ -53,7 +56,9 @@ def get_transactions():
     user_payload = check_login()
     if type(user_payload) != dict:
         return user_payload
-    user_id = user_payload['user_id']
+    user_id = user_payload.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'User ID not found!'}), 400
 
     user = get_user_by_id(user_id)
     if not user:
@@ -70,12 +75,14 @@ def get_transactions():
     return jsonify(transactions), 200
 
 
-@account_bp.route('/<account_number>', methods=['GET'])
+@account_bp.route('/<int:account_number>', methods=['GET'])
 def get_account(account_number):
     user_payload = check_login()
     if type(user_payload) != dict:
         return user_payload
-    user_id = user_payload['user_id']
+    user_id = user_payload.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'User ID not found!'}), 400
     
 
     user = user_db.get_user_by_id(user_id)

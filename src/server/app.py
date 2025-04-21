@@ -1,6 +1,8 @@
 from flask import Flask
 import routes.employee as employee_routes
 import routes.users as user_routes
+import routes.account as account_routes
+import routes.chat as chat_routes
 from database.db import init_db
 app = Flask(__name__, static_folder='static', static_url_path='/')
 
@@ -8,7 +10,8 @@ app = Flask(__name__, static_folder='static', static_url_path='/')
 
 app.register_blueprint(employee_routes.employee_bp)
 app.register_blueprint(user_routes.users_bp)
-
+app.register_blueprint(account_routes.account_bp)
+app.register_blueprint(chat_routes.chat_bp)
 
 @app.route('/')
 def index():

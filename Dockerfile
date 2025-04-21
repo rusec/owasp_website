@@ -26,7 +26,10 @@ FROM python:alpine AS runner
 # Create app directory
 WORKDIR /usr/src/owasp
 
-COPY --from=builder /app/build /usr/src/owasp/static
+COPY --from=builder /app/build /usr/src/frontend
+COPY --from=builder /app/public /usr/src/frontend/public
+
+RUN cp -r /usr/src/frontend /usr/src/owasp/static
 
 COPY src/server/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt

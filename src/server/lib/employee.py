@@ -16,6 +16,42 @@ class Employee :
     def __repr__(self):
         return f"Employee(username={self.username}, privilege={self.privilege}, employee_id={self.employee_id})"
 
+    def get_back_status(self):
+        from database.db import fetch_row
+    
+        data = fetch_row("""
+            SELECT 
+            (SELECT COUNT(id) FROM users) as user_count,
+            (SELECT COUNT(id) FROM employees) as employee_count,
+            (SELECT COUNT(id) FROM accounts) as account_count,
+            (SELECT COUNT(id) FROM transactions) as transaction_count,
+            (SELECT COUNT(id) FROM accounts WHERE in_vault = 1) as accounts_in_vault_count,
+            (SELECT COUNT(id) FROM accounts WHERE in_vault = 0) as accounts_not_in_vault_count,
+            (SELECT SUM(balance) from accounts) as total_balance,
+            (SELECT SUM(amount) from (SELECT amount FROM transactions WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)) as t) as recent_transactions_count;
+        """)
+        
+        users = data['user_count'] if data else 0
+        employees = data['employee_count'] if data else 0
+        accounts = data['account_count'] if data else 0
+        transactions = data['transaction_count'] if data else 0
+        accounts_in_vault = data['accounts_in_vault_count'] if data else 0
+        accounts_not_in_vault = data['accounts_not_in_vault_count'] if data else 0
+        total_balance = data['total_balance'] if data else 0
+        recent_transactions_count = data['recent_transactions_count'] if data else 0
+
+        return {
+            'users': users,
+            'employees': employees,
+            'accounts': accounts,
+            'transactions': transactions,
+            'accounts_in_vault': accounts_in_vault,
+            'accounts_not_in_vault': accounts_not_in_vault,
+            'total_balance': total_balance,
+            'recent_transactions_count': recent_transactions_count
+        }
+    
+
     @staticmethod
     def register(username, password, email, first_name, last_name, avatar_url="/static/images/default_avatar.png"):
         from database.db import insert_query

@@ -22,30 +22,21 @@ def login():
     if not user:
         return jsonify({'message': 'Invalid credentials!'}), 401
 
-
-    # Generate JWT token
-    token = jwt_utils.encode({
-        'username': user.username ,
-        "user_id": user.id,
-        'email': user.email,
-        'first_name': user.first_name,
-        'last_name': user.last_name,
-        'phone_number': user.phone,
-        'address': user.address,
-        'city': user.city,
-        'state': user.state,
-        'zip_code': user.zip_code,
-        'country': user.country,
-        'account_number': user.account_number,
+    json = user.to_json()
+    if not json:
+        return jsonify({'message': 'User not found!'}), 404
+    
+    json.update({
+        'user_id': user.id,
         'role': 'user',
     })
+    # Generate JWT token
+    token = jwt_utils.encode(json)
 
-
-    request.headers['Authorization'] = f'Bearer {token}'
-    request.cookies['Authorization'] = f'Bearer {token}'
-
-
-    return jsonify({'token': token}), 200
+    response = jsonify({'message': 'Login successful!'})
+    response.headers['Authorization'] = f'Bearer {token}'
+    response.set_cookie('Authorization', f'Bearer {token}')
+    return response, 200
 
 def check_login():
     # Check if the user is logged in
@@ -80,12 +71,14 @@ def register():
         return jsonify({'message': 'All fields are required!'}), 400
 
     # Generate random address, because we just want to test the register function
-    address = random_address.real_random_address_by_city('New Brunswick')
+    address = random_address.real_random_address()
+    if not address or len(address) == 0:
+        return jsonify({'message': 'Address generation failed!'}), 500
     address_1 = address['address1']
     city = address['city']
     state = address['state']
-    zip_code = address['zip']
-    country = address['country']
+    zip_code = address['postalCode']
+    country = "US"
 
     user = User.register(
         username,

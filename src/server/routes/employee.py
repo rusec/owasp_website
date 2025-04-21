@@ -63,3 +63,24 @@ def get_employee_endpoint(employee_id):
         return jsonify(employee.to_json()), 200
     else:
         return jsonify({'message': 'Employee not found!'}), 404
+
+
+@employee_bp.route("/bank", methods=["GET"])
+def get_bank_status():
+    employee = check_employee_login()
+    if type(employee) != dict:
+        return employee
+
+    employee_id = employee.get("employee_id")
+    if not employee_id:
+        return jsonify({"message": "Employee ID not found!"}), 400
+
+    employee = Employee.get_employee_employee_id(employee_id)
+    if not employee:
+        return jsonify({"message": "Employee not found!"}), 404
+
+    bank_status = employee.get_back_status()
+    if not bank_status:
+        return jsonify({"message": "Bank status not found!"}), 404
+
+    return jsonify(bank_status), 200

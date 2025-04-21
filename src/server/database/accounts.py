@@ -2,12 +2,6 @@ from random_address.random_address import Dict
 from lib.vault import forward_to_vault_server, forward_transfer_to_vault_server, add_amount_to_vault, remove_amount_from_vault
 
 
-def create_account(account_number, account_type, in_vault, user_id):
-    from database.db import insert_query
-    
-
-
-
 def get_account_internal(account_number:str):
     from database.db import fetch_row
     account = fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))

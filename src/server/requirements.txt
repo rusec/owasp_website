@@ -4,3 +4,4 @@ PyJWT
 requests
 random-address
 faker
+pytest
