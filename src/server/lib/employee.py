@@ -18,9 +18,9 @@ class Employee :
 
     def get_back_status(self):
         from database.db import fetch_row
-    
+
         data = fetch_row("""
-            SELECT 
+            SELECT
             (SELECT COUNT(id) FROM users) as user_count,
             (SELECT COUNT(id) FROM employees) as employee_count,
             (SELECT COUNT(id) FROM accounts) as account_count,
@@ -30,7 +30,7 @@ class Employee :
             (SELECT SUM(balance) from accounts) as total_balance,
             (SELECT SUM(amount) from (SELECT amount FROM transactions WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)) as t) as recent_transactions_count;
         """)
-        
+
         users = data['user_count'] if data else 0
         employees = data['employee_count'] if data else 0
         accounts = data['account_count'] if data else 0
@@ -50,7 +50,7 @@ class Employee :
             'total_balance': total_balance,
             'recent_transactions_count': recent_transactions_count
         }
-    
+
 
     @staticmethod
     def register(username, password, email, first_name, last_name, avatar_url="/static/images/default_avatar.png"):
@@ -81,8 +81,9 @@ class Employee :
         employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (employee_id,))
         if not employee_data:
             return None
+
         return Employee(
-            username=employee_data['username'],
+            username=employee_data.get('username'),
             password=employee_data['password'],
             privilege=employee_data['privilege'],
             employee_id=employee_data['id'],
@@ -132,14 +133,14 @@ class Employee :
         Update the privilege of the employee.
         :param new_privilege: The new privilege to set. Must be one of ['admin', 'user', 'trader'].
         """
-    
+
         from database.db import do_query
         if new_privilege not in self.privileges:
             raise ValueError(f"Invalid privilege: {new_privilege}. Must be one of {self.privileges}.")
         self.privilege = new_privilege
         do_query("UPDATE employees SET privilege = %s WHERE id = %s", (self.privilege, self.employee_id))
 
-    
+
     def chat(self, message):
         messsage_info = {
             'sender': self.username,
@@ -171,7 +172,7 @@ class Employee :
 def get_employee_by_id(employee_id):
     from database.db import fetch_row
     employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (employee_id,))
-    
+
     if not employee_data:
         return None
 

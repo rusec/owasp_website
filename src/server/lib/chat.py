@@ -1,4 +1,4 @@
-
+import time
 class Chat():
     def __init__(self):
         self.chat_queue = []
@@ -21,11 +21,15 @@ class Chat():
     def listen(self):
         # This method would be called in a loop to check for new messages
         while True:
+            time.sleep(1)
+
             if self.chat_queue:
-                message = self.chat_queue.pop(0)
-                yield message
-            else:
-                break
+                while len(self.chat_queue) > 0:
+                    message = self.chat_queue.pop(0)
+                    time.sleep(0.1)
+                    yield f'data: {message}\n\n'
+
+
 
 
 chatroom = Chat()

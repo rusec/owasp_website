@@ -14,17 +14,14 @@ def transfer():
         return user
 
     data = request.get_json()
-
-    # account_from = data.get('account_from')
     account_to = data.get('account_to')
     amount = data.get('amount')
 
-    if  not account_to or not amount:
+    if not account_to or not amount:
         return jsonify({'message': 'Account from, account to and amount are required!'}), 400
 
-
-    if  type(account_to) != int or type(amount) != float:
-        return jsonify({'message': 'Account from and account to must be ints and amount must be a float! '}), 400
+    if type(amount) != float:
+        return jsonify({'message': 'amount must be a float! '}), 400
 
     if amount <= 0:
         return jsonify({'message': 'Amount must be greater than 0!'}), 400
@@ -41,6 +38,9 @@ def transfer():
     if not account:
         return jsonify({'message': 'Account not found!'}), 404
 
+    account_to = int(account_to)
+
+
     if account.account_number == account_to:
         return jsonify({'message': 'Account from and account to must be different!'}), 400
 
@@ -56,6 +56,7 @@ def get_transactions():
     user_payload = check_login()
     if type(user_payload) != dict:
         return user_payload
+
     user_id = user_payload.get('user_id')
     if not user_id:
         return jsonify({'message': 'User ID not found!'}), 400
@@ -67,11 +68,11 @@ def get_transactions():
     account = user.get_account()
     if not account:
         return jsonify({'message': 'Account not found!'}), 404
-    
+
     transactions = account.get_transactions()
     if not transactions:
         return jsonify({'message': 'No transactions found!'}), 404
-    
+
     return jsonify(transactions), 200
 
 
@@ -83,7 +84,7 @@ def get_account(account_number):
     user_id = user_payload.get('user_id')
     if not user_id:
         return jsonify({'message': 'User ID not found!'}), 400
-    
+
 
     user = user_db.get_user_by_id(user_id)
 

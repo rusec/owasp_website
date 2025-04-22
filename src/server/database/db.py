@@ -98,7 +98,7 @@ cursor.execute("""
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
-""")           
+""")
 
 # Employees will be able to manage the accounts and users. They will be able to create, update, delete and view accounts and users. They will also be able to manage the vault server. The employees will be created with a default status of active.
 
@@ -197,7 +197,7 @@ def init_db(force=False):
         account_from_index = random.randint(0, len(accounts) - 1)
         account_to_index = random.randint(0, len(accounts) - 1)
         amount = random.randint(1, 1000)
-        
+
         account_from = accounts[account_from_index]
         account_to = accounts[account_to_index]
         if not account_from or not account_to:
@@ -232,13 +232,13 @@ def init_db(force=False):
         if not employee:
             print("ERROR: Unable to create employee")
             continue
-        
+
         should_update = random.randint(0, 1)
         if should_update == 1:
             employee.update_privilege('trader')
             print(f"Updated password for employee {username}")
 
-        print(f"Created employee {username} with id {employee.employee_id}") 
+        print(f"Created employee {username} with id {employee.employee_id}")
 
 
     init_query = "INSERT INTO init (flag) VALUES (%s)"
@@ -247,7 +247,7 @@ def init_db(force=False):
 
 
 
-    
+
 def insert_query (query, data):
     cursor, sql_db = get_cursor()
     cursor.execute(query, data)
@@ -261,9 +261,10 @@ def do_query(query, data=None):
         cursor.execute(query, data)
     else:
         cursor.execute(query)
+    rowcount = cursor.rowcount
     sql_db.commit()
     cursor.close()
-    return cursor.rowcount > 0
+    return rowcount > 0
 
 def fetch_row(query, data=None):
     cursor, _ = get_cursor()

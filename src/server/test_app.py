@@ -86,7 +86,7 @@ def test_get_user_info(client):
         'first_name': first_name,
         'last_name': last_name,
         'phone_number': phone,
-       
+
     }
 
     client.post('/api/user/register', json=user_json)
@@ -109,13 +109,13 @@ def test_get_user_info(client):
     print(response.json)
     assert response.status_code == 200
     assert response.json.get('username') == username
-    assert response.json.get('email') == email  
+    assert response.json.get('email') == email
     assert response.json.get('first_name') == first_name
     assert response.json.get('last_name') == last_name
     assert response.json.get('phone') == phone
-   
+
     assert response.json.get('account_number') == jwt_decode.get('account_number')
-    
+
 
 def test_get_user_account(client):
     fake = Faker()
@@ -209,7 +209,7 @@ def test_transfer_funds(client):
         'first_name': first_name,
         'last_name': last_name,
         'phone_number': phone,
- 
+
     }
     client.post('/api/user/register', json=user_two_json)
     login_json = {
@@ -232,4 +232,3 @@ def test_transfer_funds(client):
     response = client.post('/api/account/transfer', json=transfer_json, headers=headers)
     print(response.json)
     assert response.status_code == 200
-

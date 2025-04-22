@@ -8,15 +8,7 @@ chat_bp = Blueprint('chat', __name__, url_prefix='/api/chat')
 
 @chat_bp.route('/', methods=['GET'])
 def chat_stream():
-    def generate_chat_stream():
-        # Simulate a long-running process
-        yield "data: Starting chat...\n\n"
-        while True:
-            message = chatroom.listen()
-            if message:
-                yield f"data: {message}\n\n"
-
-    return Response(stream_with_context(generate_chat_stream()), content_type='text/event-stream')
+    return Response(stream_with_context(chatroom.listen()), content_type='text/event-stream')
 
 @chat_bp.route('/messages', methods=['GET'])
 def get_messages():

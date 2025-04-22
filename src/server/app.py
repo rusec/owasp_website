@@ -1,4 +1,5 @@
 from flask import Flask
+import werkzeug
 import routes.employee as employee_routes
 import routes.users as user_routes
 import routes.account as account_routes
@@ -34,11 +35,12 @@ def health():
     return {"message": "healthy"}, 200
 
 
+@app.errorhandler(500)
+def handle_bad_request(e):
+    return {"message": "Bad request", "error": e}, 500
+
 if __name__ == '__main__':
 
     # Run the app on port 5000
     init_db()
     app.run("0.0.0.0", port=5000, debug=True)
-
-
-    

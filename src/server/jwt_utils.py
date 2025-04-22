@@ -7,15 +7,15 @@ def encode(data: dict) -> str:
     Encodes the data into a JWT token.
     """
     # Set the expiration time for the token (e.g., 1 hour from now)
-    expiration_time = datetime.datetime.now() + datetime.timedelta(hours=1)
-    
+    expiration_time = datetime.datetime.now() + datetime.timedelta(hours=72)
+
     data.update({
         'exp': expiration_time,
         'iat': datetime.datetime.now()
     })
     # Create the JWT token
     token = jwt.encode(data, config.JWT_SECRET, algorithm='HS256')
-    
+
     return token
 
 def decode(token: str) -> dict:

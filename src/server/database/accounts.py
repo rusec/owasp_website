@@ -2,7 +2,7 @@ from random_address.random_address import Dict
 from lib.vault import forward_to_vault_server, forward_transfer_to_vault_server, add_amount_to_vault, remove_amount_from_vault
 
 
-def get_account_internal(account_number:str):
+def get_account_internal(account_number:int):
     from database.db import fetch_row
     account = fetch_row("SELECT * FROM accounts WHERE account_number = %s", (account_number,))
 
@@ -77,7 +77,7 @@ def transfer_funds(from_account, to_account, amount):
         result =  forward_transfer_to_vault_server(from_account, to_account, amount)
         if not result:
             return False
-        
+
         log_transfer(from_account, to_account, amount)
 
         return True
@@ -118,7 +118,7 @@ def transfer_funds(from_account, to_account, amount):
     result = log_transfer(from_account, to_account, amount)
     if not result:
         return False
-    
+
 
     return True
 

@@ -25,7 +25,7 @@ def login():
     json = user.to_json()
     if not json:
         return jsonify({'message': 'User not found!'}), 404
-    
+
     json.update({
         'user_id': user.id,
         'role': 'user',
@@ -97,14 +97,30 @@ def register():
 
     return jsonify({'message': 'User registered successfully!'}), 201
 
+@users_bp.route('/info', methods=['GET'])
+def get_user_info():
+    payload = check_login()
+    if type(payload) != dict:
+        return payload
+
+    user_id = payload['user_id']
+    user = get_user_by_id(user_id)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
+    if user:
+        return jsonify(user.to_json()), 200
+    else:
+        return jsonify({'message': 'User not found!'}), 404
+
 @users_bp.route('/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     payload = check_login()
     if type(payload) != dict:
         return payload
 
-    user_id_login = payload['user_id'] 
-    
+    user_id_login = payload['user_id']
+
     if user_id and (user_id != user_id_login):
             return jsonify({'message': 'Unauthorized!'}), 401
 
