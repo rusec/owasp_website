@@ -1,5 +1,7 @@
 import random
 
+from server.database.db import fetch_row, insert_query
+
 def get_user_by_id(user_id):
     from database.db import get_cursor
     cursor, _ = get_cursor(dictionary=True)
@@ -86,29 +88,26 @@ def create_user_account(user_id):
     in_vault = False
     account_status = 'active'
     balance = random.uniform(1000, 10000)
-    cursor, _ = get_cursor(dictionary=True)
+
     query = """
         SELECT * FROM accounts WHERE account_number = %s
     """
-    cursor.execute(query, (account_number,))
-    account = cursor.fetchone()
+    account = fetch_row(query, (account_number,))
     if account:
         # If the account already exists, generate a new account number
         return create_user_account(user_id)
-    cursor.close()
     # Create a new account for the user
     cursor, sql_db = get_cursor(dictionary=True)
 
     print(f"Creating account for user {user_id} with account number {account_number}")
 
+
     query = """
         INSERT INTO accounts (account_number, account_type, in_vault, account_status, balance, user_id)
         VALUES (%s, %s, %s, %s, %s, %s)
     """
-    cursor.execute(query, (account_number, account_type, in_vault, account_status, balance, user_id))
-    if not cursor.lastrowid:
+    result = insert_query(query, (account_number, account_type, in_vault, account_status, balance, user_id))
+    if not result:
         cursor.close()
         return None
-    sql_db.commit()
-    cursor.close()
     return account_number

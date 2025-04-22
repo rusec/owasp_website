@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from routes.users import check_login
 import database.accounts as account_db
 import database.users as user_db
-from lib.user import get_user_by_id
+from lib.user import User
 
 
 account_bp = Blueprint('account', __name__, url_prefix='/api/account')
@@ -18,7 +18,7 @@ def transfer():
     amount = data.get('amount')
 
     if not account_to or not amount:
-        return jsonify({'message': 'Account from, account to and amount are required!'}), 400
+        return jsonify({'message': 'account to and amount are required!'}), 400
 
     if type(amount) != float:
         return jsonify({'message': 'amount must be a float! '}), 400
@@ -30,7 +30,7 @@ def transfer():
     if not user_id:
         return jsonify({'message': 'User ID not found!'}), 400
 
-    user = get_user_by_id(user_id)
+    user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found!'}), 404
 
@@ -61,7 +61,7 @@ def get_transactions():
     if not user_id:
         return jsonify({'message': 'User ID not found!'}), 400
 
-    user = get_user_by_id(user_id)
+    user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found!'}), 404
 

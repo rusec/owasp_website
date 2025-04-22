@@ -24,7 +24,7 @@ class User:
             return None
         account_number = user['account_number']
         return Account.get_account(account_number, self.id)
-    
+
     @staticmethod
     def register(username: str, password: str, email: str, first_name: str, last_name: str, phone: str, address: str, city: str, state: str, zip_code: str, country: str):
         from database.users import register_user
@@ -42,7 +42,7 @@ class User:
     def login(username: str| None, password: str, email: str = None):
         from database.db import fetch_row
 
-        if not password: 
+        if not password:
             return None
         if not username and not email:
             return None
@@ -50,12 +50,25 @@ class User:
             user_data = fetch_row("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
         elif email:
             user_data = fetch_row("SELECT * FROM users WHERE email = %s AND password = %s", (email, password))
-        
+
         if not user_data:
             return None
-        
-        return User(username, password, user_data['id'], user_data['email'], user_data['first_name'], user_data['last_name'], user_data['phone'], user_data['address'], user_data['city'], user_data['state'], user_data['zip'], user_data['country'])
 
+        return User(user_data['username'], password, user_data['id'], user_data['email'], user_data['first_name'], user_data['last_name'], user_data['phone'], user_data['address'], user_data['city'], user_data['state'], user_data['zip'], user_data['country'])
+
+    @staticmethod
+    def get_user_by_id(user_id: int):
+        from database.db import fetch_row
+
+        user_data = fetch_row("SELECT * FROM users WHERE id = %s", (user_id,))
+
+        if user_data:
+            return User(
+                username=user_data['username'],
+                password=user_data['password'],
+                user_id=user_data['id']
+            )
+        return None
 
 
     def to_json(self):
@@ -84,17 +97,3 @@ class User:
             'created_at': str(user_data['created_at']),
             'updated_at': str(user_data['updated_at'])
         }
-
-
-def get_user_by_id(user_id: int):
-    from database.db import fetch_row
-
-    user_data = fetch_row("SELECT * FROM users WHERE id = %s", (user_id,))
-
-    if user_data:
-        return User(
-            username=user_data['username'],
-            password=user_data['password'],
-            user_id=user_data['id']
-        )
-    return None

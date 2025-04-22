@@ -1,4 +1,5 @@
 import mysql.connector
+from mysql.connector.types import RowItemType
 import config
 from lib.account import Account
 from lib.user import User
@@ -248,12 +249,13 @@ def init_db(force=False):
 
 
 
-def insert_query (query, data):
+def insert_query(query, data):
     cursor, sql_db = get_cursor()
     cursor.execute(query, data)
+    lastrowid = cursor.lastrowid
     sql_db.commit()
     cursor.close()
-    return cursor.lastrowid
+    return lastrowid
 
 def do_query(query, data=None):
     cursor, sql_db = get_cursor()
@@ -266,17 +268,22 @@ def do_query(query, data=None):
     cursor.close()
     return rowcount > 0
 
-def fetch_row(query, data=None):
+def fetch_row(query, data=None) -> dict[str, RowItemType] | None:
     cursor, _ = get_cursor()
     if data:
         cursor.execute(query, data)
     else:
         cursor.execute(query)
-    row = cursor.fetchone()
-    cursor.close()
-    return row
 
-def fetch_all(query, data=None):
+    row = cursor.fetchone()
+    if not row:
+        cursor.close()
+        return None
+
+    cursor.close()
+    return row # type: ignore[return-value]
+
+def fetch_all(query, data=None)-> list[dict[str, RowItemType]] | None:
     cursor, sql_db = get_cursor()
     if data:
         cursor.execute(query, data)
@@ -284,4 +291,4 @@ def fetch_all(query, data=None):
         cursor.execute(query)
     rows = cursor.fetchall()
     cursor.close()
-    return rows
+    return rows # type: ignore[return-value]

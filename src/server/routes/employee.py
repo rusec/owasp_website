@@ -39,6 +39,8 @@ def login():
 def check_employee_login():
     # Check if the user is logged in
     token = request.headers.get('Authorization')
+    if not token:
+        token = request.cookies.get("Authorization")
 
     if not token:
         return jsonify({'message': 'Unauthorized!'}), 401

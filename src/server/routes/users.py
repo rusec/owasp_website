@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 import jwt_utils
 import random_address
-from lib.user import User, get_user_by_id
+from lib.user import User
 users_bp = Blueprint('users', __name__, url_prefix='/api/user')
 
 
@@ -41,12 +41,14 @@ def login():
 def check_login():
     # Check if the user is logged in
     token = request.headers.get('Authorization')
+    if not token:
+        token = request.cookies.get("Authorization")
 
     if not token:
         return jsonify({'message': 'Unauthorized!'}), 401
     try:
         payload = jwt_utils.decode(token)
-        role = payload['role']
+        role = payload.get('role')
         if role != 'user':
             return jsonify({'message': 'Unauthorized!'}), 401
 
@@ -74,6 +76,7 @@ def register():
     address = random_address.real_random_address()
     if not address or len(address) == 0:
         return jsonify({'message': 'Address generation failed!'}), 500
+
     address_1 = address['address1']
     city = address['city']
     state = address['state']
@@ -103,8 +106,10 @@ def get_user_info():
     if type(payload) != dict:
         return payload
 
-    user_id = payload['user_id']
-    user = get_user_by_id(user_id)
+    user_id = payload.get('user_id')
+    if not user_id:
+        return jsonify({'message': 'User ID not found!'}), 400
+    user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found!'}), 404
 
@@ -124,7 +129,7 @@ def get_user(user_id):
     if user_id and (user_id != user_id_login):
             return jsonify({'message': 'Unauthorized!'}), 401
 
-    user = get_user_by_id(user_id)
+    user = User.get_user_by_id(user_id)
     if not user:
         return jsonify({'message': 'User not found!'}), 404
 

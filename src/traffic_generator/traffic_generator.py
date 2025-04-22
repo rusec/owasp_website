@@ -28,7 +28,6 @@ def create_user():
     if response.status_code != 201:
         print(f"Error creating user: {response}")
         return None
-    response_json = response.json()
 
     # login to server
     login_json = {

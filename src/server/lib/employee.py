@@ -83,7 +83,7 @@ class Employee :
             return None
 
         return Employee(
-            username=employee_data.get('username'),
+            username=employee_data['username'],
             password=employee_data['password'],
             privilege=employee_data['privilege'],
             employee_id=employee_data['id'],
@@ -94,6 +94,25 @@ class Employee :
             avatar_url=employee_data['avatar_url']
         )
 
+    @staticmethod
+    def get_employee_by_id(employee_id):
+        from database.db import fetch_row
+        employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (employee_id,))
+
+        if not employee_data:
+            return None
+
+        return Employee(
+            username=employee_data['username'],
+            password=employee_data['password'],
+            privilege=employee_data['privilege'],
+            employee_id=employee_data['id'],
+            email=employee_data['email'],
+            first_name=employee_data['first_name'],
+            last_name=employee_data['last_name'],
+            status=employee_data['status'],
+            avatar_url=employee_data['avatar_url']
+        )
 
     @staticmethod
     def login(username:str| None, password, email:str| None = None):
@@ -102,10 +121,14 @@ class Employee :
             return None
         if not username and not email:
             return None
+
         if username:
             employee_data = fetch_row("SELECT * FROM employees WHERE username = %s AND password = %s", (username, password))
         elif email:
             employee_data = fetch_row("SELECT * FROM employees WHERE email = %s AND password = %s", (email, password))
+        else:
+            employee_data = None
+
         if not employee_data:
             return None
         return Employee(
@@ -168,22 +191,3 @@ class Employee :
             'created_at': str(employee_data['created_at']),
             'updated_at': str(employee_data['updated_at'])
         }
-
-def get_employee_by_id(employee_id):
-    from database.db import fetch_row
-    employee_data = fetch_row("SELECT * FROM employees WHERE id = %s", (employee_id,))
-
-    if not employee_data:
-        return None
-
-    return Employee(
-        username=employee_data['username'],
-        password=employee_data['password'],
-        privilege=employee_data['privilege'],
-        employee_id=employee_data['id'],
-        email=employee_data['email'],
-        first_name=employee_data['first_name'],
-        last_name=employee_data['last_name'],
-        status=employee_data['status'],
-        avatar_url=employee_data['avatar_url']
-    )
