@@ -25,6 +25,17 @@ class User:
         account_number = user['account_number']
         return Account.get_account(account_number, self.id)
 
+    def update_password(self, new_password: str):
+        from database.db import do_query
+        if not self.password:
+            return None
+        if not self.id:
+            return None
+        result = do_query("UPDATE users SET password = %s WHERE id = %s", (new_password, self.id))
+        if not result:
+            return None
+        return True
+
     @staticmethod
     def register(username: str, password: str, email: str, first_name: str, last_name: str, phone: str, address: str, city: str, state: str, zip_code: str, country: str):
         from database.users import register_user
@@ -46,6 +57,7 @@ class User:
             return None
         if not username and not email:
             return None
+        user_data = None
         if username:
             user_data = fetch_row("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
         elif email:
@@ -64,12 +76,25 @@ class User:
 
         if user_data:
             return User(
+                username=str(user_data['username']),
+                password=str(user_data['password']),
+                user_id=user_data['id']
+            )
+        return None
+
+    @staticmethod
+    def get_user_by_email(email: str):
+        from database.db import fetch_row
+
+        user_data = fetch_row("SELECT * FROM users WHERE email = %s", (email,))
+
+        if user_data:
+            return User(
                 username=user_data['username'],
                 password=user_data['password'],
                 user_id=user_data['id']
             )
         return None
-
 
     def to_json(self):
         from database.db import fetch_row

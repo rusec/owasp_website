@@ -1,4 +1,7 @@
+import re
 from flask import Blueprint, jsonify, request
+from flask.helpers import url_for
+from werkzeug.utils import redirect
 import jwt_utils
 import random_address
 from lib.user import User
@@ -117,6 +120,53 @@ def get_user_info():
         return jsonify(user.to_json()), 200
     else:
         return jsonify({'message': 'User not found!'}), 404
+
+@users_bp.route('/forget', methods=['POST'])
+def forget_password():
+    data = request.get_json()
+    email = data.get('email')
+    if not email:
+        return jsonify({'message': 'Email is required!'}), 400
+
+    user = User.get_user_by_email(email)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
+    signed_request = jwt_utils.encode({
+        'email': email,
+        'user_id': user.id,
+        'request': 'forget_password'
+    })
+    if not signed_request:
+        return jsonify({'message': 'Failed to generate signed request!'}), 500
+
+    return redirect(f'/forget/reset?token={signed_request}')
+
+@users_bp.route('/forget/reset', methods=['POST'])
+def reset_password():
+    signed_request = request.args.get('token')
+    if not signed_request:
+        return jsonify({'message': 'Token is required!'}), 400
+    decoded_request = jwt_utils.decode_without_verify(signed_request)
+    if not decoded_request:
+        return jsonify({'message': 'Invalid token!'}), 401
+
+    data = request.get_json()
+    password = data.get('new_password')
+    if not password:
+        return jsonify({'message': 'New password is required!'}), 400
+
+    email = data.get('email')
+    user_id = data.get('user_id')
+    user = User.get_user_by_email(email) if email else User.get_user_by_id(user_id)
+    if not user:
+        return jsonify({'message': 'User not found!'}), 404
+
+    result = user.update_password(password)
+    if not result:
+        return jsonify({'message': 'Failed to update password!'}), 500
+
+    return jsonify({'message': 'Password reset successfully!'}), 200
 
 @users_bp.route('/<int:user_id>', methods=['GET'])
 def get_user(user_id):
