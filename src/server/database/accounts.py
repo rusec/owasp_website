@@ -1,4 +1,3 @@
-from random_address.random_address import Dict
 from lib.vault import forward_to_vault_server, forward_transfer_to_vault_server, add_amount_to_vault, remove_amount_from_vault
 
 
@@ -141,7 +140,7 @@ def log_transfer(from_account, to_account, amount):
 
 def add_amount(account_number, amount):
     # Check if the account is in vault
-    from database.db import get_cursor
+    from database.db import do_query
     account_data = get_account_internal(account_number)
     if not account_data:
         return False
@@ -150,14 +149,6 @@ def add_amount(account_number, amount):
         # Forward the request to the vault server
         return add_amount_to_vault(account_number, amount)
     else:
-        cursor, sql_db = get_cursor()
-        # Update the local account balance
         query = "UPDATE accounts SET balance = balance + %s WHERE account_number = %s"
-        cursor.execute(query, (amount, account_number))
-        # Check if the update was successful
-        if cursor.rowcount == 0:
-            return False
-        # Commit the changes
-        sql_db.commit()
-        cursor.close()
-        return True
+        result = do_query(query, (amount, account_number))
+        return result

@@ -7,7 +7,7 @@ services:
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_PASSWORD: RHZ1mpY1xxsPnD
       MYSQL_DATABASE: owasp
       VAULT_SERVER_URL: http://vault:5001
       JWT_SECRET: i@9|[D"/L(#9(=CJh2C=JIl5{@bFY9Kkg"{X2l-Y-?9qa@fX9@c6oA|R'Zz=,?.V
@@ -27,10 +27,10 @@ services:
   mysql:
     image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: xx9c7Z9idjzaJ9
       MYSQL_DATABASE: owasp
       MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_PASSWORD: RHZ1mpY1xxsPnD
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
       start_period: 5s
@@ -51,7 +51,7 @@ services:
     environment:
       MYSQL_HOST: mysqlvault
       MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_PASSWORD: RHZ1mpY1xxsPnD
       MYSQL_DATABASE: vault
     healthcheck:
       test: wget -O - 'http://127.0.0.1:5001/health'
@@ -62,10 +62,10 @@ services:
   mysqlvault:
     image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: xx9c7Z9idjzaJ9
       MYSQL_DATABASE: vault
       MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      MYSQL_PASSWORD: RHZ1mpY1xxsPnD
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
       start_period: 5s

@@ -110,7 +110,6 @@ def create_employee():
     if response.status_code != 201:
         print(f"Error creating employee: {response}")
         return None
-    response_json = response.json()
 
     # login to server
     login_json = {
