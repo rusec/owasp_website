@@ -1,7 +1,5 @@
 import random
 
-from server.database.db import fetch_row, insert_query
-
 def get_user_by_id(user_id):
     from database.db import get_cursor
     cursor, _ = get_cursor(dictionary=True)
@@ -80,7 +78,7 @@ def register_user(username, password, email, first_name, last_name, phone, addre
     return user_id, account_number
 
 def create_user_account(user_id):
-    from database.db import get_cursor
+    from database.db import fetch_row, insert_query
     from database.utils import generate_account_number
 
     account_number = generate_account_number()
@@ -97,10 +95,8 @@ def create_user_account(user_id):
         # If the account already exists, generate a new account number
         return create_user_account(user_id)
     # Create a new account for the user
-    cursor, sql_db = get_cursor(dictionary=True)
 
     print(f"Creating account for user {user_id} with account number {account_number}")
-
 
     query = """
         INSERT INTO accounts (account_number, account_type, in_vault, account_status, balance, user_id)
@@ -108,6 +104,5 @@ def create_user_account(user_id):
     """
     result = insert_query(query, (account_number, account_type, in_vault, account_status, balance, user_id))
     if not result:
-        cursor.close()
         return None
     return account_number
