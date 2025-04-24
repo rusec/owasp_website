@@ -15,17 +15,29 @@ export default function Login() {
       return;
     }
 
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch("http://localhost:5000/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
 
-    if (response.ok) {
-      console.log("Login successful");
-      // add
-    } else {
-      setError("Invalid email or password");
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Login successful!", data.message);
+          
+
+
+      } else {
+        const err = await response.json();
+        setError(err.message || "Invalid email or password");
+      }
+    } catch (err) {
+      setError("Server error. Please try again later.");
+      console.error(err);
     }
   };
 

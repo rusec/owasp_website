@@ -32,10 +32,11 @@
     "**/*.ts",
     "**/*.tsx",
     "../server/static/types/**/*.ts",
+    "./src/server/static/types/**/*.ts",
     "./static/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    "./src/server/static/types/**/*.ts"
+    "./build/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
