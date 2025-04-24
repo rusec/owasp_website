@@ -31,8 +31,8 @@ def login():
     # Generate JWT token
     token = jwt_utils.encode(employee_json)
     response =  jsonify({'token': token})
-    response.set_cookie('Authorization', f'Bearer {token}')
     response.headers.add('Authorization', f'Bearer {token}')
+    response.set_cookie('Authorization', f'{token}')
 
     return response, 200
 

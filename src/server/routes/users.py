@@ -38,7 +38,7 @@ def login():
 
     response = jsonify({'message': 'Login successful!'})
     response.headers['Authorization'] = f'Bearer {token}'
-    response.set_cookie('Authorization', f'Bearer {token}')
+    response.set_cookie('Authorization', f'{token}')
     return response, 200
 
 def check_login():
