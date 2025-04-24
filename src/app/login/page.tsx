@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -28,8 +30,7 @@ export default function Login() {
       if (response.ok) {
         const data = await response.json();
         console.log("Login successful!", data.message);
-
-
+        router.push("/dashboard");
 
       } else {
         const err = await response.json();
