@@ -1,35 +1,8 @@
 "use client";
-import Image from "next/image";
-import { useEffect } from "react";
 
 export default function Home() {
-  useEffect(() => {
-    fetch("/api/hello")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Response from API:", data);
-      })
-      .catch((error) => {
-        console.error("Error fetching API:", error);
-      });
-  }, []);
-
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-800 dark:bg-gray-900 dark:text-white font-sans">
-
-      {/* Navigation Bar */}
-      <header className="w-full px-6 py-4 flex justify-between items-center bg-blue-600 text-white shadow-md">
-        <div className="flex items-center gap-2">
-          <Image src="/next.svg" alt="logo" width={32} height={32} />
-          <span className="text-lg font-bold">Bank</span>
-        </div>
-        <nav className="flex gap-6 text-sm sm:text-base">
-          <a href="#" className="hover:underline">Home</a>
-          <a href="about" className="hover:underline">Our Employees</a>
-          <a href="login" className="hover:underline">Login</a>
-          <a href="forgot" className="hover:underline">Forgot Password</a>
-        </nav>
-      </header>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 sm:py-32 gap-6">

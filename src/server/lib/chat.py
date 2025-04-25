@@ -1,4 +1,5 @@
 import time
+import json
 class Chat():
     def __init__(self):
         self.chat_queue = []
@@ -26,8 +27,9 @@ class Chat():
             if self.chat_queue:
                 while len(self.chat_queue) > 0:
                     message = self.chat_queue.pop(0)
+                    
                     time.sleep(0.1)
-                    yield f'data: {message}\n\n'
+                    yield f'data: {json.dumps(message, sort_keys=True)}\n\n'
 
 
 

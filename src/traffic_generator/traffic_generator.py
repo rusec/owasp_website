@@ -3,7 +3,8 @@ import requests
 import random
 import time
 from config import HTTP_URL
-
+from requests.packages import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 def create_user():
     fake = Faker()
     username = fake.user_name()
@@ -24,7 +25,7 @@ def create_user():
 
     }
     # create user on server
-    response = requests.post(f'{HTTP_URL}/api/user/register', json=user_json)
+    response = requests.post(f'{HTTP_URL}/api/user/register', json=user_json,verify=False )
     if response.status_code != 201:
         print(f"Error creating user: {response}")
         return None
@@ -34,7 +35,7 @@ def create_user():
         'username': username,
         'password': password
     }
-    response = requests.post(f'{HTTP_URL}/api/user/login', json=login_json)
+    response = requests.post(f'{HTTP_URL}/api/user/login', json=login_json, verify=False)
 
     if response.status_code != 200:
         print(f"Error logging in: {response}")
@@ -45,7 +46,7 @@ def create_user():
         return None
 
     # get user info
-    response = requests.get(f'{HTTP_URL}/api/user/info', headers={'Authorization': token})
+    response = requests.get(f'{HTTP_URL}/api/user/info', headers={'Authorization': token},verify=False)
     if response.status_code != 200:
         print(f"Error getting user info: {response}")
         return None
@@ -82,7 +83,7 @@ def create_transaction(user_from, user_to, amount=10.0):
         'account_from': user_from['account_number'],
         'account_to': user_to['account_number'],
         'amount': amount
-    }, headers=user_from['headers'])
+    }, headers=user_from['headers'],verify=False)
     if response.status_code != 200:
         print(f"Error creating transaction: {response}")
         return None
@@ -106,7 +107,7 @@ def create_employee():
     }
 
     # create employee on server
-    response = requests.post(f'{HTTP_URL}/api/employee/register', json=employee_json)
+    response = requests.post(f'{HTTP_URL}/api/employee/register', json=employee_json,verify=False)
     if response.status_code != 201:
         print(f"Error creating employee: {response}")
         return None
@@ -116,7 +117,7 @@ def create_employee():
         'username': username,
         'password': password
     }
-    response = requests.post(f'{HTTP_URL}/api/employee/login', json=login_json)
+    response = requests.post(f'{HTTP_URL}/api/employee/login', json=login_json,verify=False)
     if response.status_code != 200:
         print(f"Error logging in: {response}")
         return None
@@ -126,7 +127,7 @@ def create_employee():
         print("Error: No token returned")
         return None
     # get employee info
-    response = requests.get(f'{HTTP_URL}/api/employee/info', headers={'Authorization': token})
+    response = requests.get(f'{HTTP_URL}/api/employee/info', headers={'Authorization': token},verify=False)
     if response.status_code != 200:
         print(f"Error getting employee info: {response}")
         return None
@@ -162,7 +163,7 @@ def create_employee_chat(employee, message):
     # create chat on server
     response = requests.post(f'{HTTP_URL}/api/chat/publish', json={
         'message': message
-    }, headers=employee['headers'])
+    }, headers=employee['headers'],verify=False)
     if response.status_code != 200:
         print(f"Error creating chat: {response.json()}")
         return None

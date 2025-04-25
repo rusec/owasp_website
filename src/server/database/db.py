@@ -133,7 +133,7 @@ def get_db():
 
 def get_cursor(dictionary=True):
     sql_db = get_db()
-    cursor = sql_db.cursor(dictionary=dictionary, )
+    cursor = sql_db.cursor(dictionary=dictionary,buffered=True )
     return cursor, sql_db
 
 

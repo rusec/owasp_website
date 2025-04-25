@@ -32,7 +32,7 @@ def login():
     token = jwt_utils.encode(employee_json)
     response =  jsonify({'token': token})
     response.headers.add('Authorization', f'Bearer {token}')
-    response.set_cookie('Authorization', f'{token}')
+    response.set_cookie('authorization', f'{token}')
 
     return response, 200
 
@@ -40,7 +40,7 @@ def check_employee_login():
     # Check if the user is logged in
     token = request.headers.get('Authorization')
     if not token:
-        token = request.cookies.get("Authorization")
+        token = request.cookies.get("authorization")
 
     if not token:
         return jsonify({'message': 'Unauthorized!'}), 401
@@ -73,7 +73,7 @@ def register_employee():
     if not username or not password:
         return jsonify({"message": "Username and password are required!"}), 400
 
-    employee = Employee.register(username, password, first_name, last_name, email, avatar_url)
+    employee = Employee.register(username, password,email, first_name, last_name, avatar_url)
     if not employee:
         return jsonify({"message": "Employee already exists!"}), 409
 

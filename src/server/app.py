@@ -1,10 +1,12 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 import werkzeug
 import routes.employee as employee_routes
 import routes.users as user_routes
 import routes.account as account_routes
 import routes.chat as chat_routes
+import os
 from database.db import init_db
+
 app = Flask(__name__, static_folder='static', static_url_path='/')
 
 
@@ -26,9 +28,29 @@ def login():
 def about():
     return app.send_static_file('about.html')
 
-@app.route('/forgot')
-def forgot():
-    return app.send_static_file('forgot.html')
+@app.route('/dashboard')
+def dashboard():
+    return app.send_static_file('dashboard.html')
+
+@app.route('/employee')
+def employee():
+    return app.send_static_file('employee.html')
+
+
+@app.route('/employee/<path:path>')
+def send_employee(path):
+    static_url = os.path.join(app.static_folder, './employee')
+    return send_from_directory(static_url, path + '.html')
+
+@app.route('/forget/reset')
+def forget_reset():
+    static_url = os.path.join(app.static_folder, './forget')
+    return send_from_directory(static_url, 'reset.html')
+
+@app.route('/forget')
+def forget():
+    return app.send_static_file('forget.html')
+
 
 @app.route('/health')
 def health():
@@ -43,4 +65,4 @@ if __name__ == '__main__':
 
     # Run the app on port 5000
     init_db()
-    app.run("0.0.0.0", port=5000, debug=True)
+    app.run("0.0.0.0", port=5000, debug=True, ssl_context='adhoc')

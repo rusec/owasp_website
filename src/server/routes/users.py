@@ -38,14 +38,14 @@ def login():
 
     response = jsonify({'message': 'Login successful!'})
     response.headers['Authorization'] = f'Bearer {token}'
-    response.set_cookie('Authorization', f'{token}')
+    response.set_cookie('authorization', f'{token}')
     return response, 200
 
 def check_login():
     # Check if the user is logged in
     token = request.headers.get('Authorization')
     if not token:
-        token = request.cookies.get("Authorization")
+        token = request.cookies.get("authorization")
 
     if not token:
         return jsonify({'message': 'Unauthorized!'}), 401
@@ -140,7 +140,7 @@ def forget_password():
     if not signed_request:
         return jsonify({'message': 'Failed to generate signed request!'}), 500
 
-    return redirect(f'/forget/reset?token={signed_request}')
+    return redirect(f'/forget/reset?token={signed_request}&email={email}&user_id={user.id}')
 
 @users_bp.route('/forget/reset', methods=['POST'])
 def reset_password():

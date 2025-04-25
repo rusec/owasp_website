@@ -5,3 +5,4 @@ requests
 random-address
 faker
 pytest
+pyopenssl

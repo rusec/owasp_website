@@ -34,8 +34,9 @@ RUN cp -r /usr/src/frontend /usr/src/owasp/static
 COPY src/server/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 COPY ./src/server .
 
-CMD [ "python" , "app.py", "--host=0.0.0.0", "--port=3000" ]
+CMD [ "python" , "app.py" ]
 
 
