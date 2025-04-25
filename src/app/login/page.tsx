@@ -88,7 +88,7 @@ export default function Login() {
           </form>
 
           <div className="text-center mt-4">
-            <a className="link link-primary text-sm" href="forget">
+            <a className="link link-primary text-sm" href="register">
               Don’t have an account? Sign up here.
             </a>
           </div>

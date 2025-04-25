@@ -51,6 +51,9 @@ def forget_reset():
 def forget():
     return app.send_static_file('forget.html')
 
+@app.route('/register')
+def register():
+    return app.send_static_file('register.html')
 
 @app.route('/health')
 def health():
