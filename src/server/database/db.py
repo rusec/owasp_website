@@ -250,45 +250,70 @@ def init_db(force=False):
 
 
 def insert_query(query, data):
-    cursor, sql_db = get_cursor()
-    cursor.execute(query, data)
-    lastrowid = cursor.lastrowid
-    sql_db.commit()
-    cursor.close()
-    return lastrowid
-
-def do_query(query, data=None):
-    cursor, sql_db = get_cursor()
-    if data:
+    try:
+        cursor, sql_db = get_cursor()
         cursor.execute(query, data)
-    else:
-        cursor.execute(query)
-    rowcount = cursor.rowcount
-    sql_db.commit()
-    cursor.close()
-    return rowcount > 0
-
-def fetch_row(query, data=None) -> dict[str, RowItemType] | None:
-    cursor, _ = get_cursor()
-    if data:
-        cursor.execute(query, data)
-    else:
-        cursor.execute(query)
-
-    row = cursor.fetchone()
-    if not row:
+        lastrowid = cursor.lastrowid
+        sql_db.commit()
         cursor.close()
+        return lastrowid
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
         return None
 
-    cursor.close()
-    return row # type: ignore[return-value]
+def do_query(query, data=None):
+    try:
+        cursor, sql_db = get_cursor()
+        if data:
+            cursor.execute(query, data)
+        else:
+            cursor.execute(query)
+        rowcount = cursor.rowcount
+        sql_db.commit()
+        cursor.close()
 
-def fetch_all(query, data=None)-> list[dict[str, RowItemType]] | None:
-    cursor, sql_db = get_cursor()
-    if data:
-        cursor.execute(query, data)
-    else:
-        cursor.execute(query)
-    rows = cursor.fetchall()
-    cursor.close()
-    return rows # type: ignore[return-value]
+        return rowcount > 0
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+def fetch_row(query, data=None) -> dict[str, RowItemType] | None:
+    try:
+        cursor, sql_db = get_cursor()
+        if data:
+            cursor.execute(query, data)
+        else:
+            cursor.execute(query)
+        row = cursor.fetchone()
+        cursor.close()
+        return row  # type: ignore[return-value]
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+def fetch_all(query, data=None) -> list[dict[str, RowItemType]] | None:
+    try:
+        cursor, sql_db = get_cursor()
+        if data:
+            cursor.execute(query, data)
+        else:
+            cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows  # type: ignore[return-value]
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+     
