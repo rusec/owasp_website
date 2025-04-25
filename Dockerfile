@@ -12,7 +12,6 @@ COPY ./src/app ./src/app
 COPY ./public ./public
 COPY ./next.config.ts ./
 COPY ./tsconfig.json ./
-COPY ./next-env.d.ts ./
 COPY ./package.json ./
 COPY ./eslint.config.mjs ./
 COPY ./postcss.config.mjs ./
